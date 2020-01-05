@@ -1,0 +1,4 @@
+14:11:07.345 Telescope                 Starting initialisation
+14:11:07.380 Telescope                 Completed initialisation
+14:11:07.381 Connected Set             True
+14:11:07.381 Connected Set             Connecting to port COM8
