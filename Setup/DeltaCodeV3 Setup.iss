@@ -5,19 +5,19 @@
 [Setup]
 AppID={{28dab265-1132-4fa7-9113-f43af9111b76}
 AppName=ASCOM DeltaCodeV3 Telescope Driver
-AppVerName=ASCOM DeltaCodeV3 Telescope Server 1.0.0
-AppVersion=1.0.0
+AppVerName=ASCOM DeltaCodeV3 Telescope Server 1.0.1
+AppVersion=1.0.1
 AppPublisher=Martin Cibulski <martin.cibulski@gmx.de>
 AppPublisherURL=mailto:martin.cibulski@gmx.de
 AppSupportURL=http://tech.groups.yahoo.com/group/ASCOM-Talk/
 AppUpdatesURL=http://ascom-standards.org/
-VersionInfoVersion=1.0.0
+VersionInfoVersion=1.0.1
 MinVersion=0,5.0.2195sp4
 DefaultDirName="{cf}\ASCOM\Telescope"
 DisableDirPage=yes
 DisableProgramGroupPage=yes
 OutputDir="."
-OutputBaseFilename="ASCOM_DeltaCodeV3_Server_Setup"
+OutputBaseFilename="ASCOM_DeltaCodeV3_Server_Setup_1.0.1"
 Compression=lzma
 SolidCompression=yes
 ; Put there by Platform if Driver Installer Support selected

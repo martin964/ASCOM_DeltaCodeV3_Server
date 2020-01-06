@@ -584,8 +584,13 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("AtPark", "Get - " + false.ToString());
-                return false;
+                CheckConnected("AtPark.get");
+
+                string  cMountStatus = CommandString(":Gstat", false);
+                bool    bAtPark = cMountStatus == "5" ? true : false;
+                
+                tl.LogMessage("AtPark", "Get - " + bAtPark.ToString());
+                return bAtPark;
             }
         }
 
@@ -636,8 +641,8 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("CanPark", "Get - " + false.ToString());
-                return false;
+                tl.LogMessage("CanPark", "Get - " + true.ToString());
+                return true;
             }
         }
 
@@ -672,8 +677,8 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("CanSetPark", "Get - " + false.ToString());
-                return false;
+                tl.LogMessage("CanSetPark", "Get - " + true.ToString());
+                return true;
             }
         }
 
@@ -762,8 +767,8 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("CanUnpark", "Get - " + false.ToString());
-                return false;
+                tl.LogMessage("CanUnpark", "Get - " + true.ToString());
+                return true;
             }
         }
 
@@ -1008,11 +1013,13 @@ namespace ASCOM.DeltaCodeV3
             }
         }
 
+
         public void Park()
         {
-            tl.LogMessage("Park", "Not implemented");
-            throw new ASCOM.MethodNotImplementedException("Park");
+            tl.LogMessage("Park", "OK");
+            CommandBlind(":hP", false);
         }
+
 
         public void PulseGuide(GuideDirections Direction, int Duration)
         {
@@ -1096,10 +1103,11 @@ namespace ASCOM.DeltaCodeV3
             }
         }
 
+
         public void SetPark()
         {
-            tl.LogMessage("SetPark", "Not implemented");
-            throw new ASCOM.MethodNotImplementedException("SetPark");
+            tl.LogMessage("SetPark", "OK");
+            CommandBlind(":hS", false);
         }
 
 
@@ -1473,8 +1481,8 @@ namespace ASCOM.DeltaCodeV3
 
         public void Unpark()
         {
-            tl.LogMessage("Unpark", "Not implemented");
-            throw new ASCOM.MethodNotImplementedException("Unpark");
+            tl.LogMessage("Unpark", "OK");
+            CommandBlind(":PO", false);
         }
 
 #endregion
