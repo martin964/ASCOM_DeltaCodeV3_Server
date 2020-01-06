@@ -72,7 +72,7 @@ namespace ASCOM.DeltaCodeV3
             this.picASCOM.Image = ((System.Drawing.Image)(resources.GetObject("picASCOM.Image")));
             this.picASCOM.Location = new System.Drawing.Point(227, 23);
             this.picASCOM.Name = "picASCOM";
-            this.picASCOM.Size = new System.Drawing.Size(50, 50);
+            this.picASCOM.Size = new System.Drawing.Size(50, 59);
             this.picASCOM.TabIndex = 9;
             this.picASCOM.TabStop = false;
             // 
@@ -177,7 +177,7 @@ namespace ASCOM.DeltaCodeV3
             this.Name = "SetupDialogForm";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "DeltaCodeV3 Setup [3.0.0 / 2019-12-25]";
+            this.Text = "DeltaCodeV3 Server 1.0.0 / 2020-01-05";
             ((System.ComponentModel.ISupportInitialize)(this.picASCOM)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
