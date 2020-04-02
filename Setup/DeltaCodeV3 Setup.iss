@@ -5,19 +5,19 @@
 [Setup]
 AppID={{28dab265-1132-4fa7-9113-f43af9111b76}
 AppName=ASCOM DeltaCodeV3 Telescope Driver
-AppVerName=ASCOM DeltaCodeV3 Telescope Server 1.0.1
-AppVersion=1.0.1
+AppVerName=ASCOM DeltaCodeV3 Telescope Server 1.0.4
+AppVersion=1.0.4
 AppPublisher=Martin Cibulski <martin.cibulski@gmx.de>
 AppPublisherURL=mailto:martin.cibulski@gmx.de
 AppSupportURL=http://tech.groups.yahoo.com/group/ASCOM-Talk/
 AppUpdatesURL=http://ascom-standards.org/
-VersionInfoVersion=1.0.1
+VersionInfoVersion=1.0.0
 MinVersion=0,5.0.2195sp4
 DefaultDirName="{cf}\ASCOM\Telescope"
 DisableDirPage=yes
 DisableProgramGroupPage=yes
 OutputDir="."
-OutputBaseFilename="ASCOM_DeltaCodeV3_Server_Setup_1.0.1"
+OutputBaseFilename="ASCOM_DeltaCodeV3_Server_Setup_1.0.4"
 Compression=lzma
 SolidCompression=yes
 ; Put there by Platform if Driver Installer Support selected
@@ -34,7 +34,8 @@ Name: "{cf}\ASCOM\Uninstall\Telescope\DeltaCodeV3"
 ; TODO: Add subfolders below {app} as needed (e.g. Name: "{app}\MyFolder")
 
 [Files]
-Source: "D:\PROJEKTE\DELTACODE_ASCOM\AscomDriverExe\ASCOM_DeltaCodeV3_Server\bin\Debug\ASCOM.DeltaCodeV3.exe"; DestDir: "{app}"
+Source: "D:\PROJEKTE\DELTACODE_ASCOM\AscomDriverExe\ASCOM_DeltaCodeV3_Server\bin\Debug\ASCOM.DeltaCodeV3.Telescope.dll"; DestDir: "{app}\DeltaCodeV3"
+Source: "D:\PROJEKTE\DELTACODE_ASCOM\AscomDriverExe\ASCOM_DeltaCodeV3_Server\bin\Debug\ASCOM.DeltaCodeV3.exe"; DestDir: "{app}\DeltaCodeV3"
 ; TODO: Add driver assemblies into the ServedClasses folder
 ; Require a read-me HTML to appear after installation, maybe driver's Help doc
 Source: "D:\PROJEKTE\DELTACODE_ASCOM\AscomDriverExe\ASCOM_DeltaCodeV3_Server\ReadMe.htm"; DestDir: "{app}"; Flags: isreadme
@@ -45,7 +46,7 @@ Source: "D:\PROJEKTE\DELTACODE_ASCOM\AscomDriverExe\ASCOM_DeltaCodeV3_Server\Rea
 [Run]
 
 ; Only for .NET local-server drivers
-Filename: "{app}\ASCOM.DeltaCodeV3.exe"; Parameters: "/register"
+Filename: "{app}\DeltaCodeV3\ASCOM.DeltaCodeV3.exe"; Parameters: "/register"
 
 
 
@@ -54,7 +55,7 @@ Filename: "{app}\ASCOM.DeltaCodeV3.exe"; Parameters: "/register"
 ; This helps to give a clean uninstall
 
 ; Only for .NET local-server drivers
-Filename: "{app}\ASCOM.DeltaCodeV3.exe"; Parameters: "/unregister"
+Filename: "{app}\DeltaCodeV3\ASCOM.DeltaCodeV3.exe"; Parameters: "/unregister"
 
 
 
