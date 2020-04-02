@@ -17,7 +17,7 @@ DefaultDirName="{cf}\ASCOM\Telescope"
 DisableDirPage=yes
 DisableProgramGroupPage=yes
 OutputDir="."
-OutputBaseFilename="ASCOM_DeltaCodeV3_Server_Setup_1.0.5"
+OutputBaseFilename="ASCOM_DeltaCodeV3_Server_Setup"
 Compression=lzma
 SolidCompression=yes
 ; Put there by Platform if Driver Installer Support selected

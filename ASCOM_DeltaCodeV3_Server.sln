@@ -7,8 +7,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASCOM_DeltaCodeV3_Server", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASCOM_DeltaCodeV3_Telescope", "ASCOM_DeltaCodeV3_Telescope\ASCOM_DeltaCodeV3_Telescope.csproj", "{B61BBAC5-1061-4773-97CC-1C78C4058BAF}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{ACA2C18E-A251-4C1C-9AA6-2753FD836126}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Setup", "Setup", "{25A49D94-4B21-42EF-9ADC-F575681F366E}"
 	ProjectSection(SolutionItems) = preProject
+		Setup\ASCOM_DeltaCodeV3_Server_Setup.exe = Setup\ASCOM_DeltaCodeV3_Server_Setup.exe
 		Setup\DeltaCodeV3 Setup.iss = Setup\DeltaCodeV3 Setup.iss
 		Setup\ReadMe.htm = Setup\ReadMe.htm
 	EndProjectSection
