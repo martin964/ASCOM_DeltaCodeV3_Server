@@ -865,12 +865,26 @@ namespace ASCOM.DeltaCodeV3
             }
         }
 
+        //TODO
         public double GuideRateDeclination
         {
             get
             {
-                tl.LogMessage("GuideRateDeclination Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("GuideRateDeclination", false);
+                CheckConnected("GuideRateDeclination.get");
+
+                string cRate = CommandString(":Ggui#", true);
+                double fRate;
+
+                if (Double.TryParse(cRate, System.Globalization.NumberStyles.Any, CultureInfo.GetCultureInfo("en-US"), out fRate))
+                {
+                    tl.LogMessage("GuideRateDeclination", "Get - " + fRate.ToString());
+                    return fRate;
+                }
+                else
+                {
+                    tl.LogMessage("GuideRateDeclination Get", "Not implemented");
+                    throw new ASCOM.PropertyNotImplementedException("GuideRateDeclination", false);
+                }
             }
             set
             {
@@ -883,8 +897,21 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("GuideRateRightAscension Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("GuideRateRightAscension", false);
+                CheckConnected("GuideRateRightAscension.get");
+
+                string cRate = CommandString(":Ggui#", true);
+                double fRate;
+
+                if (Double.TryParse(cRate, System.Globalization.NumberStyles.Any, CultureInfo.GetCultureInfo("en-US"), out fRate))
+                {
+                    tl.LogMessage("GuideRateRightAscension", "Get - " + fRate.ToString());
+                    return fRate;
+                }
+                else
+                {
+                    tl.LogMessage("GuideRateRightAscension Get", "Not implemented");
+                    throw new ASCOM.PropertyNotImplementedException("GuideRateRightAscension", false);
+                }
             }
             set
             {
@@ -1053,6 +1080,7 @@ namespace ASCOM.DeltaCodeV3
             tl.LogMessage("PulseGuide", "OK");
         }
 
+
         public double RightAscension
         {
             get
@@ -1174,28 +1202,42 @@ namespace ASCOM.DeltaCodeV3
             }
         }
 
+
+        //TODO
         public double SiteLatitude
         {
-            get
+            get //  :Gt#
             {
-                tl.LogMessage("SiteLatitude Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("SiteLatitude", false);
+                CheckConnected("SiteLatitude.get");
+
+                string cLat = CommandString(":Gt#", true);
+                double fLat = utilities.HMSToHours(cLat);
+
+                tl.LogMessage("SiteLatitude", "Get - " + fLat.ToString());
+                return fLat;
             }
-            set
+            set //  :StsDD*MM:SS#
             {
-                tl.LogMessage("SiteLatitude Set", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("SiteLatitude", true);
+                string cLat = utilities.DegreesToDMS(value, ":", ":");
+                tl.LogMessage("SiteLatitude", "Set - " + cLat);
             }
         }
 
-        public double SiteLongitude
+
+        //TODO
+        public double SiteLongitude //:Gg#
         {
-            get
+            get //:Gg#
             {
-                tl.LogMessage("SiteLongitude Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("SiteLongitude", false);
+                CheckConnected("SiteLongitude.get");
+
+                string cLong = CommandString(":Gg#", true);
+                double fLong = utilities.HMSToHours(cLong);
+
+                tl.LogMessage("SiteLongitude", "Get - " + fLong.ToString());
+                return fLong;
             }
-            set
+            set //  :SgsDDD*MM:SS#
             {
                 tl.LogMessage("SiteLongitude Set", "Not implemented");
                 throw new ASCOM.PropertyNotImplementedException("SiteLongitude", true);
