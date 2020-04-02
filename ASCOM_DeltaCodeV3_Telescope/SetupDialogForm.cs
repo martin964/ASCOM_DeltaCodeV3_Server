@@ -96,6 +96,10 @@ namespace ASCOM.DeltaCodeV3
             //  Show Trace ON/OFF state
             //
             chkTrace.Checked = Telescope.traceState;
+
+            this.WindowState = FormWindowState.Minimized;
+            this.Show();
+            this.WindowState = FormWindowState.Normal;
         }
 
         /**	--------------------------------------------------------------------------------
