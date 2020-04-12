@@ -5,8 +5,8 @@
 [Setup]
 AppID={{28dab265-1132-4fa7-9113-f43af9111b76}
 AppName=ASCOM DeltaCodeV3 Telescope Driver
-AppVerName=ASCOM DeltaCodeV3 Telescope Server 1.0.5
-AppVersion=1.0.5
+AppVerName=ASCOM DeltaCodeV3 Telescope Server 1.0.6
+AppVersion=1.0.6
 AppPublisher=Martin Cibulski <martin.cibulski@gmx.de>
 AppPublisherURL=mailto:martin.cibulski@gmx.de
 AppSupportURL=http://tech.groups.yahoo.com/group/ASCOM-Talk/

@@ -286,24 +286,28 @@ namespace ASCOM.DeltaCodeV3
         /// 
         public string CommandString(string command, bool raw)
         {
+            string cResponse;
+            string cEndChar;
+
             CheckConnected("CommandString");
-
             ASCOM.Utilities.Serial serial = SharedResources.SharedSerial;
-
             serial.ClearBuffers();
+
             if (raw)
             {
+                cEndChar = command.Substring(command.Length - 1);
                 serial.Transmit(command);
             }
             else
             {
-                serial.Transmit(command + '#');
+                cEndChar = "#";
+                serial.Transmit(command + cEndChar);
             }
 
-            string cResponse = serial.ReceiveTerminated("#");
-            if (cResponse.EndsWith("#"))
+            cResponse = serial.ReceiveTerminated(cEndChar);
+            if (cResponse.EndsWith(cEndChar))
             {
-                cResponse = cResponse.TrimEnd(new char[] { '#' });
+                cResponse = cResponse.TrimEnd(new char[] { cEndChar[0] });
             }
             return cResponse;
         }
@@ -387,12 +391,12 @@ namespace ASCOM.DeltaCodeV3
 
                     //  Ask version number
                     //
-                    cProductName = CommandString(":GVP#", true);
-                    cProductName = CommandString(":GVP#", true);
-                    cFirmwareVersion = CommandString(":GVF#", true);
-                    cFirmwareVersionNumber = CommandString(":GVN#", true);
-                    cFirmwareVersionDate = CommandString(":GVD#", true);
-                    cFirmwareVersionTime = CommandString(":GVT#", true);
+                    cProductName = CommandString(":GVP", false);
+                    cProductName = CommandString(":GVP", false);
+                    cFirmwareVersion = CommandString(":GVF", false);
+                    cFirmwareVersionNumber = CommandString(":GVN", false);
+                    cFirmwareVersionDate = CommandString(":GVD", false);
+                    cFirmwareVersionTime = CommandString(":GVT", false);
 
                     tl.LogMessage("Connected Set", "Product Name...........: " + cProductName);
                     tl.LogMessage("Connected Set", "Firmware Version.......: " + cFirmwareVersion);
@@ -406,11 +410,11 @@ namespace ASCOM.DeltaCodeV3
                     //  (toggle High Precision Flag)
                     //
                     string cRightAscension;
-                    cRightAscension = CommandString(":GR#", true);
-                    cRightAscension = CommandString(":GR#", true);
+                    cRightAscension = CommandString(":GR", false);
+                    cRightAscension = CommandString(":GR", false);
                     if (cRightAscension.Length <= 8)
                     {
-                        CommandBlind(":U#", true);
+                        CommandBlind(":U", false);
                     }
                 }
                 else
@@ -778,7 +782,7 @@ namespace ASCOM.DeltaCodeV3
             {
                 CheckConnected("Declination.get");
 
-                string cDeclination = CommandString(":GD#", true);
+                string cDeclination = CommandString(":GD", false);
                 double fDeclination = utilities.DMSToDegrees(cDeclination);
 
                 tl.LogMessage("Declination", "Get - " + utilities.HoursToHMS(fDeclination));
@@ -798,7 +802,7 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                string cDecRate_MilliArcsecPerMinute = CommandString(":GDr#", true);
+                string cDecRate_MilliArcsecPerMinute = CommandString(":GDr", false);
                 cDecRate_MilliArcsecPerMinute = cDecRate_MilliArcsecPerMinute.TrimEnd(new char[] { '#' });
                 int nDecRate_MilliArcsecPerMinute = Convert.ToInt32(cDecRate_MilliArcsecPerMinute);
 
@@ -872,7 +876,7 @@ namespace ASCOM.DeltaCodeV3
             {
                 CheckConnected("GuideRateDeclination.get");
 
-                string cRate = CommandString(":Ggui#", true);
+                string cRate = CommandString(":Ggui", false);
                 double fRate;
 
                 if (Double.TryParse(cRate, System.Globalization.NumberStyles.Any, CultureInfo.GetCultureInfo("en-US"), out fRate))
@@ -899,7 +903,7 @@ namespace ASCOM.DeltaCodeV3
             {
                 CheckConnected("GuideRateRightAscension.get");
 
-                string cRate = CommandString(":Ggui#", true);
+                string cRate = CommandString(":Ggui", false);
                 double fRate;
 
                 if (Double.TryParse(cRate, System.Globalization.NumberStyles.Any, CultureInfo.GetCultureInfo("en-US"), out fRate))
@@ -1087,7 +1091,7 @@ namespace ASCOM.DeltaCodeV3
             {
                 CheckConnected("RightAscension.get");
 
-                string cRightAscension = CommandString(":GR#", true);
+                string cRightAscension = CommandString(":GR", false);
                 double fRightAscension = utilities.HMSToHours (cRightAscension);
 
                 tl.LogMessage("RightAscension", "Get - " + utilities.HoursToHMS(fRightAscension));
@@ -1109,7 +1113,7 @@ namespace ASCOM.DeltaCodeV3
             {
                 CheckConnected("RightAscensionRate.get");
 
-                string cRaRate_MilliArcsecPerMinute = CommandString(":GRr#", true);
+                string cRaRate_MilliArcsecPerMinute = CommandString(":GRr", false);
                 cRaRate_MilliArcsecPerMinute = cRaRate_MilliArcsecPerMinute.TrimEnd(new char[] { '#' });
                 int nRaRate_MilliArcsecPerMinute = Convert.ToInt32(cRaRate_MilliArcsecPerMinute);
 
@@ -1153,7 +1157,7 @@ namespace ASCOM.DeltaCodeV3
                 string      cPS;
                 PierSide    ps;
 
-                cPS = CommandString(":pS#", true);
+                cPS = CommandString(":pS", false);
                 switch (cPS)
                 {
                     case "East":
@@ -1210,7 +1214,7 @@ namespace ASCOM.DeltaCodeV3
             {
                 CheckConnected("SiteLatitude.get");
 
-                string cLat = CommandString(":Gt#", true);
+                string cLat = CommandString(":Gt", false);
                 double fLat = utilities.HMSToHours(cLat);
 
                 tl.LogMessage("SiteLatitude", "Get - " + fLat.ToString());
@@ -1231,7 +1235,7 @@ namespace ASCOM.DeltaCodeV3
             {
                 CheckConnected("SiteLongitude.get");
 
-                string cLong = CommandString(":Gg#", true);
+                string cLong = CommandString(":Gg", false);
                 double fLong = utilities.HMSToHours(cLong);
 
                 tl.LogMessage("SiteLongitude", "Get - " + fLong.ToString());
