@@ -77,21 +77,18 @@ namespace ASCOM.DeltaCodeV3
         internal static string  comPortProfileName      = "COM Port";
         internal static string  comPortProfileSpeed     = "COM Port Speed";
         internal static string  comPortDefault          = "COM1";
-        internal static string  comPortSpeedDefault     = "38400";
-        internal static string  traceStateProfileName   = "Trace Level";
-        internal static string  traceStateDefault       = "true";
+        internal static string  comPortSpeedDefault             = "38400";
+        internal static string  traceStateProfileName           = "Trace Level";
+        internal static string  timeoutHandlingStateProfileName = "Timeout Handling";
+        internal static string  traceStateDefault               = "true";
+        internal static string  timeoutHandlingStateDefault     = "false";
 
-        internal static string comPort; // Variables to hold the currrent device configuration
-        internal static string comPortSpeed;
-        internal static bool traceState;
+        internal static string  comPort; // Variables to hold the currrent device configuration
+        internal static string  comPortSpeed;
+        internal static bool    traceState;
+        internal static bool    timeoutHandlingState;
 
         private Serial m_oSerialPort;
-
-        /// <summary>
-        /// Private variable to hold the connected state
-        /// </summary>
-        /// 
-        private bool connectedState;
 
         /// <summary>
         /// Private variable to hold an ASCOM Utilities object
@@ -163,7 +160,6 @@ namespace ASCOM.DeltaCodeV3
             tl.Enabled = traceState;
             tl.LogMessage("Telescope", "Starting initialisation");
 
-            connectedState = false; // Initialise connected to false
             utilities = new Util(); //Initialise util object
             astroUtilities = new AstroUtils(); // Initialise astro utilities object
 
@@ -382,7 +378,6 @@ namespace ASCOM.DeltaCodeV3
                                 break;
                         }
                         m_oSerialPort.Connected = true;
-                        connectedState = true;
                     }
                     catch (Exception ex)
                     {
@@ -428,7 +423,6 @@ namespace ASCOM.DeltaCodeV3
                             m_oSerialPort.Connected = false;
                         }
                     }
-                    connectedState = false;
                 }
             }
         }
@@ -472,7 +466,7 @@ namespace ASCOM.DeltaCodeV3
             get
             {
                 Version version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-                string driverInfo = "ASCOM Driver for DeltaCodeV3. Version: " + String.Format(CultureInfo.InvariantCulture, "{0}.{1}", version.Major, version.Minor);
+                string driverInfo = "ASCOM Driver for DeltaCodeV3. Version: " + String.Format(CultureInfo.InvariantCulture, "{0}.{1}.{2}", version.Major, version.Minor, version.Revision);
 
                 tl.LogMessage("DriverInfo Get", driverInfo);
 
@@ -490,7 +484,7 @@ namespace ASCOM.DeltaCodeV3
             get
             {
                 Version version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-                string driverVersion = String.Format(CultureInfo.InvariantCulture, "{0}.{1}", version.Major, version.Minor);
+                string driverVersion = String.Format(CultureInfo.InvariantCulture, "{0}.{1}.{2}", version.Major, version.Minor, version.Revision);
 
                 tl.LogMessage("DriverVersion Get", driverVersion);
 
@@ -645,8 +639,19 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("CanPark", "Get - " + true.ToString());
-                return true;
+                CheckConnected("CanPark.get");
+
+                string cCanPark = CommandString(":h?", false);
+
+                if (cCanPark == "1")
+                {
+                    tl.LogMessage("CanPark", "Get - " + true.ToString());
+                    return true;
+                }
+                else { 
+                    tl.LogMessage("CanPark", "Get - " + false.ToString());
+                    return false;
+                }
             }
         }
 
@@ -1172,8 +1177,6 @@ namespace ASCOM.DeltaCodeV3
                 }
                 tl.LogMessage("SideOfPier", "Get - " + ps.ToString());
                 return ps;
-                //Command: :pS#
-                //Response: “East#” or      “West#”
             }
             set
             {
@@ -1570,6 +1573,7 @@ namespace ASCOM.DeltaCodeV3
             {
                 driverProfile.DeviceType = "Telescope";
                 traceState = Convert.ToBoolean(driverProfile.GetValue(driverID, traceStateProfileName, string.Empty, traceStateDefault));
+                timeoutHandlingState = Convert.ToBoolean(driverProfile.GetValue(driverID, timeoutHandlingStateProfileName, string.Empty, timeoutHandlingStateDefault));
                 comPort = driverProfile.GetValue(driverID, comPortProfileName, string.Empty, comPortDefault);
                 comPortSpeed = driverProfile.GetValue(driverID, comPortProfileSpeed, string.Empty, comPortSpeedDefault);
             }
@@ -1584,6 +1588,7 @@ namespace ASCOM.DeltaCodeV3
             {
                 driverProfile.DeviceType = "Telescope";
                 driverProfile.WriteValue(driverID, traceStateProfileName, traceState.ToString());
+                driverProfile.WriteValue(driverID, timeoutHandlingStateProfileName, timeoutHandlingState.ToString());
                 driverProfile.WriteValue(driverID, comPortProfileName, comPort.ToString());
                 driverProfile.WriteValue(driverID, comPortProfileSpeed, comPortSpeed.ToString());
             }

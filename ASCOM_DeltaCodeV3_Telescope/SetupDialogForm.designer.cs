@@ -40,6 +40,7 @@ namespace ASCOM.DeltaCodeV3
             this.radioBaudrate38400 = new System.Windows.Forms.RadioButton();
             this.label1 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
+            this.chkTimeoutHandling = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.picASCOM)).BeginInit();
             this.SuspendLayout();
             // 
@@ -88,7 +89,7 @@ namespace ASCOM.DeltaCodeV3
             // chkTrace
             // 
             this.chkTrace.AutoSize = true;
-            this.chkTrace.Location = new System.Drawing.Point(16, 155);
+            this.chkTrace.Location = new System.Drawing.Point(16, 133);
             this.chkTrace.Name = "chkTrace";
             this.chkTrace.Size = new System.Drawing.Size(69, 17);
             this.chkTrace.TabIndex = 6;
@@ -155,6 +156,16 @@ namespace ASCOM.DeltaCodeV3
             this.label3.TabIndex = 5;
             this.label3.Text = "Baudrate";
             // 
+            // chkTimeoutHandling
+            // 
+            this.chkTimeoutHandling.AutoSize = true;
+            this.chkTimeoutHandling.Location = new System.Drawing.Point(16, 156);
+            this.chkTimeoutHandling.Name = "chkTimeoutHandling";
+            this.chkTimeoutHandling.Size = new System.Drawing.Size(138, 17);
+            this.chkTimeoutHandling.TabIndex = 6;
+            this.chkTimeoutHandling.Text = "Serial Timeout Handling";
+            this.chkTimeoutHandling.UseVisualStyleBackColor = true;
+            // 
             // SetupDialogForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -164,6 +175,7 @@ namespace ASCOM.DeltaCodeV3
             this.Controls.Add(this.radioBaudrate19200);
             this.Controls.Add(this.radioBaudrate9600);
             this.Controls.Add(this.boxSerialComPort);
+            this.Controls.Add(this.chkTimeoutHandling);
             this.Controls.Add(this.chkTrace);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label1);
@@ -177,8 +189,7 @@ namespace ASCOM.DeltaCodeV3
             this.Name = "SetupDialogForm";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "DeltaCodeV3 Server 1.0.5 / 2020-04-02";
-            this.TopMost = true;
+            this.Text = "DeltaCodeV3 Server 1.0.9 / 2020-12-31";
             ((System.ComponentModel.ISupportInitialize)(this.picASCOM)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -198,5 +209,6 @@ namespace ASCOM.DeltaCodeV3
         private System.Windows.Forms.RadioButton radioBaudrate38400;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.CheckBox chkTimeoutHandling;
     }
 }

@@ -97,9 +97,9 @@ namespace ASCOM.DeltaCodeV3
             //
             chkTrace.Checked = Telescope.traceState;
 
-            this.WindowState = FormWindowState.Minimized;
-            this.Show();
-            this.WindowState = FormWindowState.Normal;
+            //  Show Timeout Handler ON/OFF state
+            //
+            chkTimeoutHandling.Checked = Telescope.timeoutHandlingState;
         }
 
         /**	--------------------------------------------------------------------------------
@@ -166,5 +166,6 @@ namespace ASCOM.DeltaCodeV3
                 MessageBox.Show(other.Message);
             }
         }
+
     }
 }
