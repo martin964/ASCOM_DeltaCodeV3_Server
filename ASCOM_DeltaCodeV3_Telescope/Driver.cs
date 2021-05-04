@@ -245,10 +245,12 @@ namespace ASCOM.DeltaCodeV3
             serial.ClearBuffers();
             if (raw)
             {
+                tl.LogMessage("CommandBlind", String.Format("command=<{0}>, raw={1}", command, raw));
                 serial.Transmit(command);
             }
             else
             {
+                tl.LogMessage("CommandBlind", String.Format("command=<{0}>, raw={1}", command, raw));
                 serial.Transmit(command + '#');
             }
         }
@@ -267,6 +269,7 @@ namespace ASCOM.DeltaCodeV3
             CheckConnected("CommandBool");
 
             string ret = CommandString(command, raw);
+            tl.LogMessage("CommandBool", String.Format("command=<{0}>, raw={1}, return=<{2}>", command, raw, ret));
 
             return false;
         }
@@ -301,6 +304,8 @@ namespace ASCOM.DeltaCodeV3
             }
 
             cResponse = serial.ReceiveTerminated(cEndChar);
+            tl.LogMessage("CommandString", String.Format("command=<{0}>, raw={1}, return=<{2}>", command, raw, cResponse));
+
             if (cResponse.EndsWith(cEndChar))
             {
                 cResponse = cResponse.TrimEnd(new char[] { cEndChar[0] });

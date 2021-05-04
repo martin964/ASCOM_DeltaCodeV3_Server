@@ -189,7 +189,7 @@ namespace ASCOM.DeltaCodeV3
             this.Name = "SetupDialogForm";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "DeltaCodeV3 Server 1.0.9 / 2020-12-31";
+            this.Text = "DeltaCodeV3 Server 1.0.10 / 2020-05-04";
             ((System.ComponentModel.ISupportInitialize)(this.picASCOM)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
