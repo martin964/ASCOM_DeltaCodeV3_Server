@@ -135,10 +135,6 @@
       <Project>{3689a2cb-94c5-4012-a5cf-7e7d1dd27143}</Project>
       <Name>ASCOM_DeltaCodeV3_Server</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ASCOM_DeltaCodeV3_Telescope\ASCOM_DeltaCodeV3_Telescope.csproj">
-      <Project>{b61bbac5-1061-4773-97cc-1c78c4058baf}</Project>
-      <Name>ASCOM_DeltaCodeV3_Telescope</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

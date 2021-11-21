@@ -54,11 +54,11 @@ namespace ASCOM.DeltaCodeV3
     //
 
     /// <summary>
-    /// ASCOM Focuser Driver for DeltaCodeV3.
+    /// ASCOM Focuser Driver for DeltaCodeV3
     /// </summary>
     [Guid("c139eb83-17c0-4ef6-bbd1-65e35928a9cd")]
     [ProgId("ASCOM.DeltaCodeV3.Focuser")]
-    [ServedClassName("ASCOM Telescope Driver for DeltaCodeV3")]
+    [ServedClassName("Focuser Driver for DeltaCodeV3")]
     [ClassInterface(ClassInterfaceType.None)]
     public class Focuser : ReferenceCountedObjectBase, IFocuserV3
     {
@@ -71,14 +71,12 @@ namespace ASCOM.DeltaCodeV3
         /// <summary>
         /// Driver description that displays in the ASCOM Chooser.
         /// </summary>
-        private static string driverDescription = "ASCOM Focuser Driver for DeltaCodeV3.";
+        private static string driverDescription = "Focuser Driver for DeltaCodeV3";
 
-        internal static string comPortProfileName = "COM Port"; // Constants used for Profile persistence
-        internal static string comPortDefault = "COM1";
-        internal static string traceStateProfileName = "Trace Level";
-        internal static string traceStateDefault = "false";
+        internal static string  traceStateProfileName = "Trace Level";
+        internal static string  traceStateDefault     = "true";
+        internal static bool    traceState;
 
-        internal static string comPort; // Variables to hold the current device configuration
 
         /// <summary>
         /// Private variable to hold the connected state
@@ -211,26 +209,24 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                LogMessage("Connected", "Get {0}", IsConnected);
-                return IsConnected;
+                bool bIsConnected = SharedResources.SharedSerial.Connected;
+                tl.LogMessage("Connected Get", bIsConnected.ToString());
+                return bIsConnected;
             }
             set
             {
                 tl.LogMessage("Connected", "Set {0}", value);
-                if (value == IsConnected)
+                if (value == SharedResources.SharedSerial.Connected)
+                {
                     return;
-
+                }
                 if (value)
                 {
-                    connectedState = true;
-                    LogMessage("Connected Set", "Connecting to port {0}", comPort);
-                    // TODO connect to the device
+                    SharedResources.Connect(tl);
                 }
                 else
                 {
-                    connectedState = false;
-                    LogMessage("Connected Set", "Disconnecting from port {0}", comPort);
-                    // TODO disconnect from the device
+                    SharedResources.Disconnect(tl);
                 }
             }
         }
@@ -515,11 +511,12 @@ namespace ASCOM.DeltaCodeV3
         /// </summary>
         internal void ReadProfile()
         {
+            SharedResources.ReadProfile();
+
             using (Profile driverProfile = new Profile())
             {
-                driverProfile.DeviceType = "Focuser";
-                tl.Enabled = Convert.ToBoolean(driverProfile.GetValue(driverID, traceStateProfileName, string.Empty, traceStateDefault));
-                comPort = driverProfile.GetValue(driverID, comPortProfileName, string.Empty, comPortDefault);
+                driverProfile.DeviceType = "Telescope";
+                traceState = Convert.ToBoolean(driverProfile.GetValue("ASCOM.DeltaCodeV3.Telescope", traceStateProfileName, string.Empty, traceStateDefault));
             }
         }
 
@@ -528,11 +525,12 @@ namespace ASCOM.DeltaCodeV3
         /// </summary>
         internal void WriteProfile()
         {
+            SharedResources.WriteProfile();
+
             using (Profile driverProfile = new Profile())
             {
-                driverProfile.DeviceType = "Focuser";
-                driverProfile.WriteValue(driverID, traceStateProfileName, tl.Enabled.ToString());
-                driverProfile.WriteValue(driverID, comPortProfileName, comPort.ToString());
+                driverProfile.DeviceType = "Telescope";
+                driverProfile.WriteValue("ASCOM.DeltaCodeV3.Telescope", traceStateProfileName, traceState.ToString());
             }
         }
 

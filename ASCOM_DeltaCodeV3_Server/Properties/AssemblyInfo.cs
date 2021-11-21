@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("ASCOM Initiative")]
 [assembly: AssemblyProduct("DeltaCodeV3")]
-[assembly: AssemblyCopyright("Copyright © 2020, Martin Cibulski")]
+[assembly: AssemblyCopyright("Copyright © 2021, Martin Cibulski")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -25,6 +25,6 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("1.0.10.0")]
 [assembly: AssemblyFileVersion("1.0.10.0")]
 
-[assembly: ComVisibleAttribute(false)]
+[assembly: ComVisible(true)]
 [assembly: Guid("1EAC6272-7F7D-4428-B1F0-88949AE80601")]
 [assembly: NeutralResourcesLanguage("en-US")]

@@ -56,7 +56,7 @@ namespace ASCOM.DeltaCodeV3
     /// 
     [Guid("6B16CEBB-6892-4C28-96C3-A202D1C2746B")]
     [ProgId("ASCOM.DeltaCodeV3.Telescope")]
-    [ServedClassName("ASCOM Telescope Driver for DeltaCodeV3")]
+    [ServedClassName("Telescope Driver for DeltaCodeV3")]
     [ClassInterface(ClassInterfaceType.None)]
 
     public class Telescope : ReferenceCountedObjectBase, ITelescopeV3
@@ -72,23 +72,11 @@ namespace ASCOM.DeltaCodeV3
         /// Driver description that displays in the ASCOM Chooser.
         /// </summary>
         /// 
-        //private static string driverDescription = "ASCOM Telescope Driver for DeltaCodeV3.";
+        private static string driverDescription = "ASCOM Telescope Driver for DeltaCodeV3.";
 
-        internal static string  comPortProfileName      = "COM Port";
-        internal static string  comPortProfileSpeed     = "COM Port Speed";
-        internal static string  comPortDefault          = "COM1";
-        internal static string  comPortSpeedDefault             = "38400";
-        internal static string  traceStateProfileName           = "Trace Level";
-        internal static string  timeoutHandlingStateProfileName = "Timeout Handling";
-        internal static string  traceStateDefault               = "true";
-        internal static string  timeoutHandlingStateDefault     = "false";
-
-        internal static string  comPort; // Variables to hold the currrent device configuration
-        internal static string  comPortSpeed;
+        internal static string  traceStateProfileName = "Trace Level";
+        internal static string  traceStateDefault     = "true";
         internal static bool    traceState;
-        internal static bool    timeoutHandlingState;
-
-        private Serial m_oSerialPort;
 
         /// <summary>
         /// Private variable to hold an ASCOM Utilities object
@@ -341,53 +329,20 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("Connected Get", IsConnected.ToString());
-                return IsConnected;
+                bool bIsConnected = SharedResources.SharedSerial.Connected;
+                tl.LogMessage("Connected Get", bIsConnected.ToString());
+                return bIsConnected;
             }
             set
             {
-
                 tl.LogMessage("Connected Set", value.ToString());
-                if (value == IsConnected)
+                if (value == SharedResources.SharedSerial.Connected)
                 {
                     return;
                 }
                 if (value)
                 {
-                    tl.LogMessage("Connected Set", "Connecting to port " + comPort);
-
-                    if (string.IsNullOrEmpty(Telescope.comPort))
-                    {
-                        throw new ASCOM.NotConnectedException("No Serial Port selected");
-                    }
-
-                    try
-                    {
-                        if (String.IsNullOrEmpty(Telescope.comPortSpeed))
-                        {
-                            Telescope.comPortSpeed = Telescope.comPortSpeedDefault;
-                        }
-
-                        m_oSerialPort = SharedResources.SharedSerial;   // new Serial();
-                        m_oSerialPort.PortName = Telescope.comPort;
-                        switch (Telescope.comPortSpeed)
-                        {
-                            case "9600":
-                                m_oSerialPort.Speed = SerialSpeed.ps9600;
-                                break;
-                            case "19200":
-                                m_oSerialPort.Speed = SerialSpeed.ps19200;
-                                break;
-                            case "38400":
-                                m_oSerialPort.Speed = SerialSpeed.ps38400;
-                                break;
-                        }
-                        m_oSerialPort.Connected = true;
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new ASCOM.NotConnectedException(ex.Message, ex);
-                    }
+                    SharedResources.Connect(tl);
 
                     //  Ask version number
                     //
@@ -419,15 +374,7 @@ namespace ASCOM.DeltaCodeV3
                 }
                 else
                 {
-                    tl.LogMessage("Connected Set", "Disconnecting from port " + comPort);
-
-                    if (m_oSerialPort != null)
-                    {
-                        if (m_oSerialPort.Connected)
-                        {
-                            m_oSerialPort.Connected = false;
-                        }
-                    }
+                    SharedResources.Disconnect(tl);
                 }
             }
         }
@@ -1574,13 +1521,12 @@ namespace ASCOM.DeltaCodeV3
         /// </summary>
         internal void ReadProfile()
         {
+            SharedResources.ReadProfile();
+
             using (Profile driverProfile = new Profile())
             {
                 driverProfile.DeviceType = "Telescope";
                 traceState = Convert.ToBoolean(driverProfile.GetValue(driverID, traceStateProfileName, string.Empty, traceStateDefault));
-                timeoutHandlingState = Convert.ToBoolean(driverProfile.GetValue(driverID, timeoutHandlingStateProfileName, string.Empty, timeoutHandlingStateDefault));
-                comPort = driverProfile.GetValue(driverID, comPortProfileName, string.Empty, comPortDefault);
-                comPortSpeed = driverProfile.GetValue(driverID, comPortProfileSpeed, string.Empty, comPortSpeedDefault);
             }
         }
 
@@ -1589,13 +1535,12 @@ namespace ASCOM.DeltaCodeV3
         /// </summary>
         internal void WriteProfile()
         {
+            SharedResources.WriteProfile();
+
             using (Profile driverProfile = new Profile())
             {
                 driverProfile.DeviceType = "Telescope";
                 driverProfile.WriteValue(driverID, traceStateProfileName, traceState.ToString());
-                driverProfile.WriteValue(driverID, timeoutHandlingStateProfileName, timeoutHandlingState.ToString());
-                driverProfile.WriteValue(driverID, comPortProfileName, comPort.ToString());
-                driverProfile.WriteValue(driverID, comPortProfileSpeed, comPortSpeed.ToString());
             }
         }
 

@@ -48,20 +48,20 @@ namespace ASCOM.DeltaCodeV3
             //  Show previously selected Comm Port
             //  (taken from Properties.Settings.Default.CommPort)
             //
-            if (!String.IsNullOrEmpty(Server.comPort))
+            if (!String.IsNullOrEmpty(SharedResources.comPort))
             {
-                boxSerialComPort.SelectedItem = Server.comPort;
+                boxSerialComPort.SelectedItem = SharedResources.comPort;
             }
 
             //  Show previously selected Comm Port Speed
             //  (taken from Properties.Settings.Default.CommPortSpeed)
             //  Show default speed if not explicitly selected
             //
-            if (String.IsNullOrEmpty(Server.comPortSpeed))
+            if (String.IsNullOrEmpty(SharedResources.comPortSpeed))
             {
-                Server.comPortSpeed = Server.comPortSpeedDefault;
+                SharedResources.comPortSpeed = SharedResources.comPortSpeedDefault;
             }
-            switch (Server.comPortSpeed)
+            switch (SharedResources.comPortSpeed)
             {
                 case "9600":
                     radioBaudrate9600 .Checked = true;
@@ -95,11 +95,11 @@ namespace ASCOM.DeltaCodeV3
 
             //  Show Trace ON/OFF state
             //
-            chkTrace.Checked = Server.traceState;
+            chkTrace.Checked = SharedResources.traceState;
 
             //  Show Timeout Handler ON/OFF state
             //
-            chkTimeoutHandling.Checked = Server.timeoutHandlingState;
+            chkTimeoutHandling.Checked = SharedResources.timeoutHandlingState;
         }
 
         /**	--------------------------------------------------------------------------------
@@ -112,26 +112,26 @@ namespace ASCOM.DeltaCodeV3
             //
             if (boxSerialComPort.SelectedItem != null)
             {
-                Server.comPort = boxSerialComPort.SelectedItem.ToString();
+                SharedResources.comPort = boxSerialComPort.SelectedItem.ToString();
             }
             else
             {
-                Server.comPort = "";
+                SharedResources.comPort = "";
             }
 
             if (radioBaudrate9600.Checked)
             {
-                Server.comPortSpeed = "9600";
+                SharedResources.comPortSpeed = "9600";
             }
             else if (radioBaudrate19200.Checked)
             {
-                Server.comPortSpeed = "19200";
+                SharedResources.comPortSpeed = "19200";
             }
             else if (radioBaudrate38400.Checked)
             {
-                Server.comPortSpeed = "38400";
+                SharedResources.comPortSpeed = "38400";
             }
-            Server.traceState = chkTrace.Checked;
+            SharedResources.traceState = chkTrace.Checked;
         }
 
         /**	--------------------------------------------------------------------------------

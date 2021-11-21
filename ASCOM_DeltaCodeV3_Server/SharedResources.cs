@@ -16,7 +16,9 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+
 using ASCOM;
+using ASCOM.Utilities;
 
 namespace ASCOM.DeltaCodeV3
 {
@@ -37,9 +39,20 @@ namespace ASCOM.DeltaCodeV3
 		private static ASCOM.Utilities.Serial s_sharedSerial = new ASCOM.Utilities.Serial();		// Shared serial port
 		private static int s_z = 0;     // counter for the number of connections to the serial port
 
-		//
-		// Public access to shared resources
-		//
+        //
+        // Public access to shared resources
+        //
+        public static bool      traceState;
+        public static string    comPortProfileName = "COM Port";
+        public static string    comPortProfileSpeed = "COM Port Speed";
+        public static string    comPortDefault = "COM1";
+        public static string    comPortSpeedDefault = "38400";
+        public static string    comPort; // Variables to hold the currrent device configuration
+        public static string    comPortSpeed;
+
+        public static string    timeoutHandlingStateProfileName = "Timeout Handling";
+        public static string    timeoutHandlingStateDefault = "false";
+        internal static bool    timeoutHandlingState;
 
         #region single serial port connector
         //
@@ -92,29 +105,108 @@ namespace ASCOM.DeltaCodeV3
         /// checking Connected and if it's false setting up the port before setting connected to true.
         /// It could also be put here.
         /// </summary>
-        public static bool Connected
+        //public static bool Connected
+        //{
+        //    set
+        //    {
+        //        lock (lockObject)
+        //        {
+        //            if (value)
+        //            {
+        //                if (s_z == 0)
+        //                    SharedSerial.Connected = true;
+        //                s_z++;
+        //            }
+        //            else
+        //            {
+        //                s_z--;
+        //                if (s_z <= 0)
+        //                {
+        //                    SharedSerial.Connected = false;
+        //                }
+        //            }
+        //        }
+        //    }
+        //    get { return SharedSerial.Connected; }
+        //}
+
+        public static void Connect (TraceLogger tl)
         {
-            set
+            ReadProfile();
+
+            tl.LogMessage("Connected Set", "Connecting to port " + comPort);
+
+            if (string.IsNullOrEmpty(comPort))
             {
-                lock (lockObject)
+                throw new ASCOM.NotConnectedException("No Serial Port selected");
+            }
+
+            try
+            {
+                if (String.IsNullOrEmpty(comPortSpeed))
                 {
-                    if (value)
-                    {
-                        if (s_z == 0)
-                            SharedSerial.Connected = true;
-                        s_z++;
-                    }
-                    else
-                    {
-                        s_z--;
-                        if (s_z <= 0)
-                        {
-                            SharedSerial.Connected = false;
-                        }
-                    }
+                    comPortSpeed = comPortSpeedDefault;
+                }
+
+                Serial oSerialPort = SharedSerial;
+                oSerialPort.PortName = comPort;
+                switch (comPortSpeed)
+                {
+                    case "9600":
+                        oSerialPort.Speed = SerialSpeed.ps9600;
+                        break;
+                    case "19200":
+                        oSerialPort.Speed = SerialSpeed.ps19200;
+                        break;
+                    case "38400":
+                        oSerialPort.Speed = SerialSpeed.ps38400;
+                        break;
+                }
+                oSerialPort.Connected = true;
+            }
+            catch (Exception ex)
+            {
+                throw new ASCOM.NotConnectedException(ex.Message, ex);
+            }
+        }
+
+        public static void Disconnect(TraceLogger tl)
+        {
+            if (SharedSerial != null)
+            {
+                if (SharedSerial.Connected)
+                {
+                    SharedSerial.Connected = false;
                 }
             }
-            get { return SharedSerial.Connected; }
+        }
+
+        /// <summary>
+        /// Read the device configuration from the ASCOM Profile store
+        /// </summary>
+        public static void ReadProfile()
+        {
+            using (Profile driverProfile = new Profile())
+            {
+                driverProfile.DeviceType = "Telescope";
+                timeoutHandlingState = Convert.ToBoolean(driverProfile.GetValue("ASCOM.DeltaCodeV3.Telescope", timeoutHandlingStateProfileName, string.Empty, timeoutHandlingStateDefault));
+                comPort = driverProfile.GetValue("ASCOM.DeltaCodeV3.Telescope", comPortProfileName, string.Empty, comPortDefault);
+                comPortSpeed = driverProfile.GetValue("ASCOM.DeltaCodeV3.Telescope", comPortProfileSpeed, string.Empty, comPortSpeedDefault);
+            }
+        }
+
+        /// <summary>
+        /// Write the device configuration to the  ASCOM  Profile store
+        /// </summary>
+        public static void WriteProfile()
+        {
+            using (Profile driverProfile = new Profile())
+            {
+                driverProfile.DeviceType = "Telescope";
+                driverProfile.WriteValue("ASCOM.DeltaCodeV3.Telescope", timeoutHandlingStateProfileName, timeoutHandlingState.ToString());
+                driverProfile.WriteValue("ASCOM.DeltaCodeV3.Telescope", comPortProfileName, comPort.ToString());
+                driverProfile.WriteValue("ASCOM.DeltaCodeV3.Telescope", comPortProfileSpeed, comPortSpeed.ToString());
+            }
         }
 
         #endregion
