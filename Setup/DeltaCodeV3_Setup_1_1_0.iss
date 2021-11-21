@@ -5,13 +5,13 @@
 [Setup]
 AppID={{28dab265-1132-4fa7-9113-f43af9111b76}
 AppName=ASCOM DeltaCodeV3 Telescope Driver
-AppVerName=ASCOM DeltaCodeV3 Telescope Server 1.0.10
-AppVersion=1.0.10
+AppVerName=ASCOM DeltaCodeV3 Telescope Server 1.1.0
+AppVersion=1.1.0
 AppPublisher=Martin Cibulski <martin.cibulski@gmx.de>
 AppPublisherURL=mailto:martin.cibulski@gmx.de
 AppSupportURL=http://tech.groups.yahoo.com/group/ASCOM-Talk/
 AppUpdatesURL=http://ascom-standards.org/
-VersionInfoVersion=1.0.10
+VersionInfoVersion=1.1.0
 MinVersion=0,5.0.2195sp4
 DefaultDirName="{cf}\ASCOM\Telescope"
 DisableDirPage=yes
@@ -34,6 +34,7 @@ Name: "{cf}\ASCOM\Uninstall\Telescope\DeltaCodeV3"
 ; TODO: Add subfolders below {app} as needed (e.g. Name: "{app}\MyFolder")
 
 [Files]
+Source: "D:\PROJEKTE\DELTACODE_ASCOM\AscomDriverExe\ASCOM_DeltaCodeV3_Focuser\bin\Debug\ASCOM.DeltaCodeV3.Focuser.dll"; DestDir: "{app}\DeltaCodeV3"
 Source: "D:\PROJEKTE\DELTACODE_ASCOM\AscomDriverExe\ASCOM_DeltaCodeV3_Telescope\bin\Debug\ASCOM.DeltaCodeV3.Telescope.dll"; DestDir: "{app}\DeltaCodeV3"
 Source: "D:\PROJEKTE\DELTACODE_ASCOM\AscomDriverExe\ASCOM_DeltaCodeV3_Server\bin\Debug\ASCOM.DeltaCodeV3.exe"; DestDir: "{app}\DeltaCodeV3"
 ; TODO: Add driver assemblies into the ServedClasses folder
@@ -61,7 +62,7 @@ Filename: "{app}\DeltaCodeV3\ASCOM.DeltaCodeV3.exe"; Parameters: "/unregister"
 
 [Code]
 const
-   REQUIRED_PLATFORM_VERSION = 6.2;    // Set this to the minimum required ASCOM Platform version for this application
+   REQUIRED_PLATFORM_VERSION = 6.4;    // Set this to the minimum required ASCOM Platform version for this application
 //
 // Function to return the ASCOM Platform's version number as a double.
 //

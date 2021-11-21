@@ -584,6 +584,20 @@ namespace ASCOM.DeltaCodeV3
 		}
 		#endregion
 
+		internal static string comPortProfileName = "COM Port";
+		internal static string comPortProfileSpeed = "COM Port Speed";
+		internal static string comPortDefault = "COM1";
+		internal static string comPortSpeedDefault = "38400";
+		internal static string comPort; // Variables to hold the currrent device configuration
+		internal static string comPortSpeed;
+
+		internal static string traceStateProfileName = "Trace Level";
+		internal static string timeoutHandlingStateProfileName = "Timeout Handling";
+		internal static string traceStateDefault = "true";
+		internal static string timeoutHandlingStateDefault = "false";
+		internal static bool traceState;
+		internal static bool timeoutHandlingState;
+
 		#region SERVER ENTRY POINT (main)
 		//
 		// ==================

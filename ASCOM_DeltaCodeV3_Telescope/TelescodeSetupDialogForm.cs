@@ -29,9 +29,9 @@ namespace ASCOM.DeltaCodeV3
      *  in der Liste selektiert
      *	--------------------------------------------------------------------------------
      */
-    public partial class SetupDialogForm : Form
+    public partial class TelescopeSetupDialogForm : Form
     {
-        public SetupDialogForm()
+        public TelescopeSetupDialogForm()
         {
             InitializeComponent();
 

@@ -23,19 +23,19 @@
 #define Telescope
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Text;
 using System.Runtime.InteropServices;
-
 
 using ASCOM;
 using ASCOM.Astrometry;
 using ASCOM.Astrometry.AstroUtils;
-using ASCOM.Utilities;
 using ASCOM.DeviceInterface;
-using System.Globalization;
-using System.Collections;
+using ASCOM.Utilities;
+
 
 namespace ASCOM.DeltaCodeV3
 {
@@ -58,7 +58,7 @@ namespace ASCOM.DeltaCodeV3
     [ProgId("ASCOM.DeltaCodeV3.Telescope")]
     [ServedClassName("ASCOM Telescope Driver for DeltaCodeV3")]
     [ClassInterface(ClassInterfaceType.None)]
-    //public class Telescope : ITelescopeV3
+
     public class Telescope : ReferenceCountedObjectBase, ITelescopeV3
     {
         /// <summary>

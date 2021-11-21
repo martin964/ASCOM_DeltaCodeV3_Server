@@ -1,6 +1,6 @@
 namespace ASCOM.DeltaCodeV3
 {
-    partial class SetupDialogForm
+    partial class TelescopeSetupDialogForm
     {
         /// <summary>
         /// Required designer variable.
@@ -28,7 +28,7 @@ namespace ASCOM.DeltaCodeV3
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SetupDialogForm));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TelescopeSetupDialogForm));
             this.cmdOK = new System.Windows.Forms.Button();
             this.cmdCancel = new System.Windows.Forms.Button();
             this.picASCOM = new System.Windows.Forms.PictureBox();
