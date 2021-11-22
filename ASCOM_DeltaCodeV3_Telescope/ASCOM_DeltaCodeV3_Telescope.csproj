@@ -8,7 +8,7 @@
     <ProjectGuid>{B61BBAC5-1061-4773-97CC-1C78C4058BAF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ASCOM.DeltaCode</RootNamespace>
+    <RootNamespace>ASCOM.DeltaCodeV3</RootNamespace>
     <AssemblyName>ASCOM.DeltaCodeV3.Telescope</AssemblyName>
     <FileUpgradeFlags>
     </FileUpgradeFlags>

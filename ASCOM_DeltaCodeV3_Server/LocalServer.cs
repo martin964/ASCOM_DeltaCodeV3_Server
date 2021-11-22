@@ -551,6 +551,11 @@ namespace ASCOM.DeltaCodeV3
 
 				switch (args[0].ToLower())
 				{
+					case "-debug":
+						RegisterObjects();                                      // Register each served object
+						bRet = true;
+						break;
+
 					case "-embedding":
 						StartedByCOM = true;										// Indicate COM started us
 						break;
