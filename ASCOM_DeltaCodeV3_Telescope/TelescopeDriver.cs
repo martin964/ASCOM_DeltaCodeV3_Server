@@ -66,17 +66,13 @@ namespace ASCOM.DeltaCodeV3
         /// The DeviceID is used by ASCOM applications to load the driver at runtime.
         /// </summary>
         /// 
-        internal static string driverID; // = "ASCOM.DeltaCodeV3.Telescope";    //TODO take from ProdId
+        internal static string driverID;
 
         /// <summary>
         /// Driver description that displays in the ASCOM Chooser.
         /// </summary>
         /// 
-        private static string driverDescription = "ASCOM Telescope Driver for DeltaCodeV3.";
-
-        internal static string  traceStateProfileName = "Trace Level";
-        internal static string  traceStateDefault     = "true";
-        internal static bool    traceState;
+        private static string driverDescription = "Telescope Driver for DeltaCodeV3";
 
         /// <summary>
         /// Private variable to hold an ASCOM Utilities object
@@ -95,17 +91,6 @@ namespace ASCOM.DeltaCodeV3
         /// </summary>
         /// 
         private TraceLogger tl;
-
-
-        /// <summary>
-        /// Private variables to hold the DelatCode Product and Firmware Version
-        /// </summary>
-        /// 
-        string cProductName             = "DeltaCodeV3";
-        string cFirmwareVersion         = "V3";
-        string cFirmwareVersionNumber   = "01.1";
-        string cFirmwareVersionDate     = "2019-xx-xx";
-        string cFirmwareVersionTime     = "00:00:00";
 
 
         /// <summary>
@@ -142,16 +127,15 @@ namespace ASCOM.DeltaCodeV3
 
             //  Read device configuration from the ASCOM Profile store
             //  
-            ReadProfile();
+            SharedResources.ReadProfile();
 
-            tl = new TraceLogger("", "DeltaCodeV3");
-            tl.Enabled = traceState;
-            tl.LogMessage("Telescope", "Starting initialisation");
+            tl = SharedResources.TraceLogger;
+            LogMessage("Telescope", "Starting initialisation");
 
             utilities = new Util(); //Initialise util object
             astroUtilities = new AstroUtils(); // Initialise astro utilities object
 
-            tl.LogMessage("Telescope", "Completed initialisation");
+            LogMessage("Telescope", "Completed initialisation");
         }
 
 
@@ -170,24 +154,7 @@ namespace ASCOM.DeltaCodeV3
         /// 
         public void SetupDialog()
         {
-            // consider only showing the setup dialog if not connected
-            // or call a different dialog if connected
-
-            if (IsConnected)
-            {
-                System.Windows.Forms.MessageBox.Show("Already connected, just press OK");
-            }
-
-            using (SetupDialogForm frmSetup = new SetupDialogForm())
-            {
-                System.Windows.Forms.DialogResult result = frmSetup.ShowDialog();
-                if (result == System.Windows.Forms.DialogResult.OK)
-                {
-                    //  Persist device configuration values to the ASCOM Profile store
-                    //  
-                    WriteProfile();
-                }
-            }
+            SharedResources.SetupDialog();
         }
 
 
@@ -199,7 +166,7 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("SupportedActions Get", "Returning empty arraylist");
+                LogMessage("SupportedActions Get", "Returning empty arraylist");
                 return new ArrayList();
             }
         }
@@ -214,6 +181,7 @@ namespace ASCOM.DeltaCodeV3
         /// 
         public string Action(string actionName, string actionParameters)
         {
+            LogMessage("Action {0}, parameters {1} not implemented", actionName);
             throw new ASCOM.ActionNotImplementedException("Action " + actionName + " is not implemented by this driver");
         }
 
@@ -226,21 +194,7 @@ namespace ASCOM.DeltaCodeV3
         /// 
         public void CommandBlind(string command, bool raw)
         {
-            CheckConnected("CommandBlind");
-
-            ASCOM.Utilities.Serial serial = SharedResources.SharedSerial;
-
-            serial.ClearBuffers();
-            if (raw)
-            {
-                tl.LogMessage("CommandBlind", String.Format("command=<{0}>, raw={1}", command, raw));
-                serial.Transmit(command);
-            }
-            else
-            {
-                tl.LogMessage("CommandBlind", String.Format("command=<{0}>, raw={1}", command, raw));
-                serial.Transmit(command + '#');
-            }
+            SharedResources.CommandBlind(command, raw);
         }
 
 
@@ -254,12 +208,7 @@ namespace ASCOM.DeltaCodeV3
         /// 
         public bool CommandBool(string command, bool raw)
         {
-            CheckConnected("CommandBool");
-
-            string ret = CommandString(command, raw);
-            tl.LogMessage("CommandBool", String.Format("command=<{0}>, raw={1}, return=<{2}>", command, raw, ret));
-
-            return false;
+            return SharedResources.CommandBool(command, raw);
         }
 
 
@@ -273,32 +222,7 @@ namespace ASCOM.DeltaCodeV3
         /// 
         public string CommandString(string command, bool raw)
         {
-            string cResponse;
-            string cEndChar;
-
-            CheckConnected("CommandString");
-            ASCOM.Utilities.Serial serial = SharedResources.SharedSerial;
-            serial.ClearBuffers();
-
-            if (raw)
-            {
-                cEndChar = command.Substring(command.Length - 1);
-                serial.Transmit(command);
-            }
-            else
-            {
-                cEndChar = "#";
-                serial.Transmit(command + cEndChar);
-            }
-
-            cResponse = serial.ReceiveTerminated(cEndChar);
-            tl.LogMessage("CommandString", String.Format("command=<{0}>, raw={1}, return=<{2}>", command, raw, cResponse));
-
-            if (cResponse.EndsWith(cEndChar))
-            {
-                cResponse = cResponse.TrimEnd(new char[] { cEndChar[0] });
-            }
-            return cResponse;
+            return SharedResources.CommandString(command, raw);
         }
 
 
@@ -329,35 +253,31 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                bool bIsConnected = SharedResources.SharedSerial.Connected;
-                tl.LogMessage("Connected Get", bIsConnected.ToString());
+                bool bIsConnected = SharedResources.Connected;
+                LogMessage("Connected Get", bIsConnected.ToString());
                 return bIsConnected;
             }
             set
             {
-                tl.LogMessage("Connected Set", value.ToString());
-                if (value == SharedResources.SharedSerial.Connected)
-                {
-                    return;
-                }
+                LogMessage("Connected Set", value.ToString());
+                SharedResources.Connected = value;
+
                 if (value)
                 {
-                    SharedResources.Connect(tl);
-
                     //  Ask version number
                     //
-                    cProductName = CommandString(":GVP", false);
-                    cProductName = CommandString(":GVP", false);
-                    cFirmwareVersion = CommandString(":GVF", false);
-                    cFirmwareVersionNumber = CommandString(":GVN", false);
-                    cFirmwareVersionDate = CommandString(":GVD", false);
-                    cFirmwareVersionTime = CommandString(":GVT", false);
+                    string cProductName           = CommandString(":GVP", false);
+                           cProductName           = CommandString(":GVP", false);
+                    string cFirmwareVersion       = CommandString(":GVF", false);
+                    string cFirmwareVersionNumber = CommandString(":GVN", false);
+                    string cFirmwareVersionDate   = CommandString(":GVD", false);
+                    string cFirmwareVersionTime   = CommandString(":GVT", false);
 
-                    tl.LogMessage("Connected Set", "Product Name...........: " + cProductName);
-                    tl.LogMessage("Connected Set", "Firmware Version.......: " + cFirmwareVersion);
-                    tl.LogMessage("Connected Set", "Firmware Version Number: " + cFirmwareVersionNumber);
-                    tl.LogMessage("Connected Set", "Firmware Version Date..: " + cFirmwareVersionDate);
-                    tl.LogMessage("Connected Set", "Firmware Version Time..: " + cFirmwareVersionTime);
+                    LogMessage("Connected Set", "Product Name...........: " + cProductName);
+                    LogMessage("Connected Set", "Firmware Version.......: " + cFirmwareVersion);
+                    LogMessage("Connected Set", "Firmware Version Number: " + cFirmwareVersionNumber);
+                    LogMessage("Connected Set", "Firmware Version Date..: " + cFirmwareVersionDate);
+                    LogMessage("Connected Set", "Firmware Version Time..: " + cFirmwareVersionTime);
 
                     //  Set coordinates to high precision
                     //  First ask for right ascension (:GR#) then check the result.
@@ -372,10 +292,6 @@ namespace ASCOM.DeltaCodeV3
                         CommandBlind(":U", false);
                     }
                 }
-                else
-                {
-                    SharedResources.Disconnect(tl);
-                }
             }
         }
 
@@ -388,23 +304,8 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                string cDescription;
-
-                if (IsConnected)
-                {
-                    cDescription    = "Product Name...........: " + cProductName + Environment.NewLine
-                                    + "Firmware Version.......: " + cFirmwareVersion + Environment.NewLine
-                                    + "Firmware Version Number: " + cFirmwareVersionNumber + Environment.NewLine
-                                    + "Firmware Version Date..: " + cFirmwareVersionDate + Environment.NewLine
-                                    + "Firmware Version Time..: " + cFirmwareVersionTime;
-                    tl.LogMessage("Description Get", cDescription.Replace("\n", "\\n"));
-                }
-                else
-                {
-                    tl.LogMessage("Description Get", "NOT CONNECTED !");
-                    throw new ASCOM.NotConnectedException();
-                }
-                return cDescription;
+                LogMessage("Description Get", driverDescription);
+                return driverDescription;
             }
         }
 
@@ -418,9 +319,9 @@ namespace ASCOM.DeltaCodeV3
             get
             {
                 Version version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-                string driverInfo = "ASCOM Driver for DeltaCodeV3. Version: " + String.Format(CultureInfo.InvariantCulture, "{0}.{1}.{2}", version.Major, version.Minor, version.Revision);
+                string driverInfo = "ASCOM Driver for DeltaCodeV3 Version: " + String.Format(CultureInfo.InvariantCulture, "{0}.{1}.{2}", version.Major, version.Minor, version.Revision);
 
-                tl.LogMessage("DriverInfo Get", driverInfo);
+                LogMessage("DriverInfo Get", driverInfo);
 
                 return driverInfo;
             }
@@ -438,7 +339,7 @@ namespace ASCOM.DeltaCodeV3
                 Version version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
                 string driverVersion = String.Format(CultureInfo.InvariantCulture, "{0}.{1}.{2}", version.Major, version.Minor, version.Revision);
 
-                tl.LogMessage("DriverVersion Get", driverVersion);
+                LogMessage("DriverVersion Get", driverVersion);
 
                 return driverVersion;
             }
@@ -454,7 +355,7 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("InterfaceVersion Get", "3");
+                LogMessage("InterfaceVersion Get", "3");
                 return Convert.ToInt16("3");
             }
         }
@@ -469,7 +370,7 @@ namespace ASCOM.DeltaCodeV3
             get
             {
                 string name = "ASCOM.DeltaCodeV3.Telescope";
-                tl.LogMessage("Name Get", name);
+                LogMessage("Name Get", name);
                 return name;
             }
         }
@@ -481,7 +382,7 @@ namespace ASCOM.DeltaCodeV3
 
         public void AbortSlew()
         {
-            tl.LogMessage("AbortSlew", "Not implemented");
+            LogMessage("AbortSlew", "Not implemented");
             throw new ASCOM.MethodNotImplementedException("AbortSlew");
         }
 
@@ -489,7 +390,7 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("AlignmentMode Get", "algGermanPolar");
+                LogMessage("AlignmentMode Get", "algGermanPolar");
                 return AlignmentModes.algGermanPolar;
             }
         }
@@ -498,7 +399,7 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("Altitude", "Not implemented");
+                LogMessage("Altitude", "Not implemented");
                 throw new ASCOM.PropertyNotImplementedException("Altitude", false);
             }
         }
@@ -507,7 +408,7 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("ApertureArea Get", "Not implemented");
+                LogMessage("ApertureArea Get", "Not implemented");
                 throw new ASCOM.PropertyNotImplementedException("ApertureArea", false);
             }
         }
@@ -516,7 +417,7 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("ApertureDiameter Get", "Not implemented");
+                LogMessage("ApertureDiameter Get", "Not implemented");
                 throw new ASCOM.PropertyNotImplementedException("ApertureDiameter", false);
             }
         }
@@ -525,7 +426,7 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("AtHome", "Get - " + false.ToString());
+                LogMessage("AtHome", "Get - " + false.ToString());
                 return false;
             }
         }
@@ -539,14 +440,14 @@ namespace ASCOM.DeltaCodeV3
                 string  cMountStatus = CommandString(":Gstat", false);
                 bool    bAtPark = cMountStatus == "5" ? true : false;
                 
-                tl.LogMessage("AtPark", "Get - " + bAtPark.ToString());
+                LogMessage("AtPark", "Get - " + bAtPark.ToString());
                 return bAtPark;
             }
         }
 
         public IAxisRates AxisRates(TelescopeAxes Axis)
         {
-            tl.LogMessage("AxisRates", "Get - " + Axis.ToString());
+            LogMessage("AxisRates", "Get - " + Axis.ToString());
             return new AxisRates(Axis);
         }
 
@@ -554,7 +455,7 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("Azimuth Get", "Not implemented");
+                LogMessage("Azimuth Get", "Not implemented");
                 throw new ASCOM.PropertyNotImplementedException("Azimuth", false);
             }
         }
@@ -563,7 +464,7 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("CanFindHome", "Get - " + false.ToString());
+                LogMessage("CanFindHome", "Get - " + false.ToString());
                 return false;
             }
         }
@@ -574,13 +475,13 @@ namespace ASCOM.DeltaCodeV3
             switch (Axis)
             {
                 case TelescopeAxes.axisPrimary:
-                    tl.LogMessage("CanMoveAxis", "Get[axisPrimary] - " + true.ToString());
+                    LogMessage("CanMoveAxis", "Get[axisPrimary] - " + true.ToString());
                     return true;
                 case TelescopeAxes.axisSecondary:
-                    tl.LogMessage("CanMoveAxis", "Get[axisSecondary] - " + true.ToString());
+                    LogMessage("CanMoveAxis", "Get[axisSecondary] - " + true.ToString());
                     return true;
                 case TelescopeAxes.axisTertiary:
-                    tl.LogMessage("CanMoveAxis", "Get[axisTertiary] - " + false.ToString());
+                    LogMessage("CanMoveAxis", "Get[axisTertiary] - " + false.ToString());
                     return false;
                 default:
                     throw new InvalidValueException("CanMoveAxis", Axis.ToString(), "0 to 2");
@@ -597,11 +498,11 @@ namespace ASCOM.DeltaCodeV3
 
                 if (cCanPark == "1")
                 {
-                    tl.LogMessage("CanPark", "Get - " + true.ToString());
+                    LogMessage("CanPark", "Get - " + true.ToString());
                     return true;
                 }
                 else { 
-                    tl.LogMessage("CanPark", "Get - " + false.ToString());
+                    LogMessage("CanPark", "Get - " + false.ToString());
                     return false;
                 }
             }
@@ -611,7 +512,7 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("CanPulseGuide", "Get - " + true.ToString());
+                LogMessage("CanPulseGuide", "Get - " + true.ToString());
                 return true;
             }
         }
@@ -620,7 +521,7 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("CanSetDeclinationRate", "Get - " + true.ToString());
+                LogMessage("CanSetDeclinationRate", "Get - " + true.ToString());
                 return true;
             }
         }
@@ -629,7 +530,7 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("CanSetGuideRates", "Get - " + false.ToString());
+                LogMessage("CanSetGuideRates", "Get - " + false.ToString());
                 return false;
             }
         }
@@ -638,7 +539,7 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("CanSetPark", "Get - " + true.ToString());
+                LogMessage("CanSetPark", "Get - " + true.ToString());
                 return true;
             }
         }
@@ -647,7 +548,7 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("CanSetPierSide", "Get - " + false.ToString());
+                LogMessage("CanSetPierSide", "Get - " + false.ToString());
                 return false;
             }
         }
@@ -656,7 +557,7 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("CanSetRightAscensionRate", "Get - " + true.ToString());
+                LogMessage("CanSetRightAscensionRate", "Get - " + true.ToString());
                 return true;
             }
         }
@@ -665,7 +566,7 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("CanSetTracking", "Get - " + false.ToString());
+                LogMessage("CanSetTracking", "Get - " + false.ToString());
                 return false;
             }
         }
@@ -674,7 +575,7 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("CanSlew", "Get - " + false.ToString());
+                LogMessage("CanSlew", "Get - " + false.ToString());
                 return false;
             }
         }
@@ -683,7 +584,7 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("CanSlewAltAz", "Get - " + false.ToString());
+                LogMessage("CanSlewAltAz", "Get - " + false.ToString());
                 return false;
             }
         }
@@ -692,7 +593,7 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("CanSlewAltAzAsync", "Get - " + false.ToString());
+                LogMessage("CanSlewAltAzAsync", "Get - " + false.ToString());
                 return false;
             }
         }
@@ -701,7 +602,7 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("CanSlewAsync", "Get - " + true.ToString());
+                LogMessage("CanSlewAsync", "Get - " + true.ToString());
                 return true;
             }
         }
@@ -710,7 +611,7 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("CanSync", "Get - " + true.ToString());
+                LogMessage("CanSync", "Get - " + true.ToString());
                 return true;
             }
         }
@@ -719,7 +620,7 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("CanSyncAltAz", "Get - " + false.ToString());
+                LogMessage("CanSyncAltAz", "Get - " + false.ToString());
                 return false;
             }
         }
@@ -728,7 +629,7 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("CanUnpark", "Get - " + true.ToString());
+                LogMessage("CanUnpark", "Get - " + true.ToString());
                 return true;
             }
         }
@@ -742,7 +643,7 @@ namespace ASCOM.DeltaCodeV3
                 string cDeclination = CommandString(":GD", false);
                 double fDeclination = utilities.DMSToDegrees(cDeclination);
 
-                tl.LogMessage("Declination", "Get - " + utilities.HoursToHMS(fDeclination));
+                LogMessage("Declination", "Get - " + utilities.HoursToHMS(fDeclination));
                 return fDeclination;
             }
         }
@@ -765,7 +666,7 @@ namespace ASCOM.DeltaCodeV3
 
                 m_fDeclinationRate = (nDecRate_MilliArcsecPerMinute) / (1000.0 * 60.0);
 
-                tl.LogMessage("DeclinationRate", "Get - " + m_fDeclinationRate.ToString());
+                LogMessage("DeclinationRate", "Get - " + m_fDeclinationRate.ToString());
                 return m_fDeclinationRate;
             }
             set
@@ -775,7 +676,7 @@ namespace ASCOM.DeltaCodeV3
                 string cDecRate = nDecRate_MilliArcsecPerMinute.ToString();
                 CommandBlind(":Sdr" + cDecRate, false);
 
-                tl.LogMessage("DeclinationRate Set", "Set + " + value.ToString());
+                LogMessage("DeclinationRate Set", "Set + " + value.ToString());
 
                 m_fDeclinationRate = value;
             }
@@ -783,7 +684,7 @@ namespace ASCOM.DeltaCodeV3
 
         public PierSide DestinationSideOfPier(double RightAscension, double Declination)
         {
-            tl.LogMessage("DestinationSideOfPier Get", "Not implemented");
+            LogMessage("DestinationSideOfPier Get", "Not implemented");
             throw new ASCOM.MethodNotImplementedException("DestinationSideOfPier");
         }
 
@@ -791,12 +692,12 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("DoesRefraction", "Get - " + false.ToString());
+                LogMessage("DoesRefraction", "Get - " + false.ToString());
                 return false;
             }
             set
             {
-                tl.LogMessage("DoesRefraction Set", "Not implemented");
+                LogMessage("DoesRefraction Set", "Not implemented");
                 throw new ASCOM.PropertyNotImplementedException("DoesRefraction", true);
             }
         }
@@ -806,14 +707,14 @@ namespace ASCOM.DeltaCodeV3
             get
             {
                 EquatorialCoordinateType equatorialSystem = EquatorialCoordinateType.equJ2000;
-                tl.LogMessage("EquatorialSystem", "Get - " + equatorialSystem.ToString());
+                LogMessage("EquatorialSystem", "Get - " + equatorialSystem.ToString());
                 return equatorialSystem;
             }
         }
 
         public void FindHome()
         {
-            tl.LogMessage("FindHome", "Not implemented");
+            LogMessage("FindHome", "Not implemented");
             throw new ASCOM.MethodNotImplementedException("FindHome");
         }
 
@@ -821,7 +722,7 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("FocalLength Get", "Not implemented");
+                LogMessage("FocalLength Get", "Not implemented");
                 throw new ASCOM.PropertyNotImplementedException("FocalLength", false);
             }
         }
@@ -838,18 +739,18 @@ namespace ASCOM.DeltaCodeV3
 
                 if (Double.TryParse(cRate, System.Globalization.NumberStyles.Any, CultureInfo.GetCultureInfo("en-US"), out fRate))
                 {
-                    tl.LogMessage("GuideRateDeclination", "Get - " + fRate.ToString());
+                    LogMessage("GuideRateDeclination", "Get - " + fRate.ToString());
                     return fRate;
                 }
                 else
                 {
-                    tl.LogMessage("GuideRateDeclination Get", "Not implemented");
+                    LogMessage("GuideRateDeclination Get", "Not implemented");
                     throw new ASCOM.PropertyNotImplementedException("GuideRateDeclination", false);
                 }
             }
             set
             {
-                tl.LogMessage("GuideRateDeclination Set", "Not implemented");
+                LogMessage("GuideRateDeclination Set", "Not implemented");
                 throw new ASCOM.PropertyNotImplementedException("GuideRateDeclination", true);
             }
         }
@@ -865,18 +766,18 @@ namespace ASCOM.DeltaCodeV3
 
                 if (Double.TryParse(cRate, System.Globalization.NumberStyles.Any, CultureInfo.GetCultureInfo("en-US"), out fRate))
                 {
-                    tl.LogMessage("GuideRateRightAscension", "Get - " + fRate.ToString());
+                    LogMessage("GuideRateRightAscension", "Get - " + fRate.ToString());
                     return fRate;
                 }
                 else
                 {
-                    tl.LogMessage("GuideRateRightAscension Get", "Not implemented");
+                    LogMessage("GuideRateRightAscension Get", "Not implemented");
                     throw new ASCOM.PropertyNotImplementedException("GuideRateRightAscension", false);
                 }
             }
             set
             {
-                tl.LogMessage("GuideRateRightAscension Set", "Not implemented");
+                LogMessage("GuideRateRightAscension Set", "Not implemented");
                 throw new ASCOM.PropertyNotImplementedException("GuideRateRightAscension", true);
             }
         }
@@ -901,14 +802,14 @@ namespace ASCOM.DeltaCodeV3
                     bIsPulseGuiding = true;
                 }
 
-                tl.LogMessage("CanSlewAsync", "Get - " + bIsPulseGuiding.ToString());
+                LogMessage("CanSlewAsync", "Get - " + bIsPulseGuiding.ToString());
                 return bIsPulseGuiding;
             }
         }
 
         public void MoveAxis(TelescopeAxes Axis, double Rate)
         {
-            tl.LogMessage("MoveAxis", "OK");
+            LogMessage("MoveAxis", "OK");
 
             AxisRates oRates = new AxisRates(Axis);
 
@@ -1004,7 +905,7 @@ namespace ASCOM.DeltaCodeV3
 
         public void Park()
         {
-            tl.LogMessage("Park", "OK");
+            LogMessage("Park", "OK");
             CommandBlind(":hP", false);
         }
 
@@ -1038,7 +939,7 @@ namespace ASCOM.DeltaCodeV3
             }
 
 
-            tl.LogMessage("PulseGuide", "OK");
+            LogMessage("PulseGuide", "OK");
         }
 
 
@@ -1051,7 +952,7 @@ namespace ASCOM.DeltaCodeV3
                 string cRightAscension = CommandString(":GR", false);
                 double fRightAscension = utilities.HMSToHours (cRightAscension);
 
-                tl.LogMessage("RightAscension", "Get - " + utilities.HoursToHMS(fRightAscension));
+                LogMessage("RightAscension", "Get - " + utilities.HoursToHMS(fRightAscension));
                 return fRightAscension;
             }
         }
@@ -1076,7 +977,7 @@ namespace ASCOM.DeltaCodeV3
 
                 m_fRightascensionRate = (nRaRate_MilliArcsecPerMinute) / (15.0 * 1000.0 * 60.0);
 
-                tl.LogMessage("RightAscensionRate", "Get - " + m_fRightascensionRate.ToString());
+                LogMessage("RightAscensionRate", "Get - " + m_fRightascensionRate.ToString());
                 return m_fRightascensionRate;
             }
             set
@@ -1086,7 +987,7 @@ namespace ASCOM.DeltaCodeV3
                 string cRaRate = nRaRate_MilliArcsecPerMinute.ToString();
                 CommandBlind(":Srr" + cRaRate, false);
 
-                tl.LogMessage("RightAscensionRate", "Set + " + m_fRightascensionRate.ToString());
+                LogMessage("RightAscensionRate", "Set + " + m_fRightascensionRate.ToString());
 
                 m_fRightascensionRate = value;
             }
@@ -1095,7 +996,7 @@ namespace ASCOM.DeltaCodeV3
 
         public void SetPark()
         {
-            tl.LogMessage("SetPark", "OK");
+            LogMessage("SetPark", "OK");
             CommandBlind(":hS", false);
         }
 
@@ -1127,12 +1028,12 @@ namespace ASCOM.DeltaCodeV3
                         ps = PierSide.pierUnknown;
                         break;
                 }
-                tl.LogMessage("SideOfPier", "Get - " + ps.ToString());
+                LogMessage("SideOfPier", "Get - " + ps.ToString());
                 return ps;
             }
             set
             {
-                tl.LogMessage("SideOfPier Set", "Not implemented");
+                LogMessage("SideOfPier Set", "Not implemented");
                 throw new ASCOM.PropertyNotImplementedException("SideOfPier", true);
             }
         }
@@ -1142,7 +1043,7 @@ namespace ASCOM.DeltaCodeV3
             get
             {
                 double siderealTime = (18.697374558 + 24.065709824419081 * (utilities.DateLocalToJulian(DateTime.Now) - 2451545.0)) % 24.0;
-                tl.LogMessage("SiderealTime", "Get - " + siderealTime.ToString());
+                LogMessage("SiderealTime", "Get - " + siderealTime.ToString());
                 return siderealTime;
             }
         }
@@ -1151,12 +1052,12 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("SiteElevation Get", "Not implemented");
+                LogMessage("SiteElevation Get", "Not implemented");
                 throw new ASCOM.PropertyNotImplementedException("SiteElevation", false);
             }
             set
             {
-                tl.LogMessage("SiteElevation Set", "Not implemented");
+                LogMessage("SiteElevation Set", "Not implemented");
                 throw new ASCOM.PropertyNotImplementedException("SiteElevation", true);
             }
         }
@@ -1172,13 +1073,13 @@ namespace ASCOM.DeltaCodeV3
                 string cLat = CommandString(":Gt", false);
                 double fLat = utilities.HMSToHours(cLat);
 
-                tl.LogMessage("SiteLatitude", "Get - " + fLat.ToString());
+                LogMessage("SiteLatitude", "Get - " + fLat.ToString());
                 return fLat;
             }
             set //  :StsDD*MM:SS#
             {
                 string cLat = utilities.DegreesToDMS(value, ":", ":");
-                tl.LogMessage("SiteLatitude", "Set - " + cLat);
+                LogMessage("SiteLatitude", "Set - " + cLat);
             }
         }
 
@@ -1193,12 +1094,12 @@ namespace ASCOM.DeltaCodeV3
                 string cLong = CommandString(":Gg", false);
                 double fLong = utilities.HMSToHours(cLong);
 
-                tl.LogMessage("SiteLongitude", "Get - " + fLong.ToString());
+                LogMessage("SiteLongitude", "Get - " + fLong.ToString());
                 return fLong;
             }
             set //  :SgsDDD*MM:SS#
             {
-                tl.LogMessage("SiteLongitude Set", "Not implemented");
+                LogMessage("SiteLongitude Set", "Not implemented");
                 throw new ASCOM.PropertyNotImplementedException("SiteLongitude", true);
             }
         }
@@ -1207,37 +1108,37 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("SlewSettleTime Get", "Not implemented");
+                LogMessage("SlewSettleTime Get", "Not implemented");
                 throw new ASCOM.PropertyNotImplementedException("SlewSettleTime", false);
             }
             set
             {
-                tl.LogMessage("SlewSettleTime Set", "Not implemented");
+                LogMessage("SlewSettleTime Set", "Not implemented");
                 throw new ASCOM.PropertyNotImplementedException("SlewSettleTime", true);
             }
         }
 
         public void SlewToAltAz(double Azimuth, double Altitude)
         {
-            tl.LogMessage("SlewToAltAz", "Not implemented");
+            LogMessage("SlewToAltAz", "Not implemented");
             throw new ASCOM.MethodNotImplementedException("SlewToAltAz");
         }
 
         public void SlewToAltAzAsync(double Azimuth, double Altitude)
         {
-            tl.LogMessage("SlewToAltAzAsync", "Not implemented");
+            LogMessage("SlewToAltAzAsync", "Not implemented");
             throw new ASCOM.MethodNotImplementedException("SlewToAltAzAsync");
         }
 
         public void SlewToCoordinates(double RightAscension, double Declination)
         {
-            tl.LogMessage("SlewToCoordinates", "Not implemented");
+            LogMessage("SlewToCoordinates", "Not implemented");
             throw new ASCOM.MethodNotImplementedException("SlewToCoordinates");
         }
 
         public void SlewToCoordinatesAsync(double fRightAscension, double fDeclination)
         {
-            tl.LogMessage("SlewToCoordinatesAsync", "OK");
+            LogMessage("SlewToCoordinatesAsync", "OK");
 
             string cRightAscension;
             string cDeclination;
@@ -1266,13 +1167,13 @@ namespace ASCOM.DeltaCodeV3
 
         public void SlewToTarget()
         {
-            tl.LogMessage("SlewToTarget", "Not implemented");
+            LogMessage("SlewToTarget", "Not implemented");
             throw new ASCOM.MethodNotImplementedException("SlewToTarget");
         }
 
         public void SlewToTargetAsync()
         {
-            tl.LogMessage("SlewToTargetAsync", "OK");
+            LogMessage("SlewToTargetAsync", "OK");
 
             string cRightAscension;
             string cDeclination;
@@ -1291,20 +1192,20 @@ namespace ASCOM.DeltaCodeV3
             {
                 bool bSlewing = m_bIsSlewingRA || m_bIsSlewingDec;
 
-                tl.LogMessage("Slewing", "Get - " + bSlewing.ToString());
+                LogMessage("Slewing", "Get - " + bSlewing.ToString());
                 return bSlewing;
             }
         }
 
         public void SyncToAltAz(double Azimuth, double Altitude)
         {
-            tl.LogMessage("SyncToAltAz", "Not implemented");
+            LogMessage("SyncToAltAz", "Not implemented");
             throw new ASCOM.MethodNotImplementedException("SyncToAltAz");
         }
 
         public void SyncToCoordinates(double fRightAscension, double fDeclination)
         {
-            tl.LogMessage("SyncToCoordinates", "OK");
+            LogMessage("SyncToCoordinates", "OK");
 
             string cRightAscension;
             string cDeclination;
@@ -1339,7 +1240,7 @@ namespace ASCOM.DeltaCodeV3
             cRightAscension = utilities.HoursToHMS(m_fTargetRightascension);
             cDeclination    = utilities.HoursToHMS(m_fTargetDeclination);
 
-            tl.LogMessage("SyncToTarget", "RA=" + cRightAscension + " / Dec=" + cDeclination);
+            LogMessage("SyncToTarget", "RA=" + cRightAscension + " / Dec=" + cDeclination);
 
             CommandString(":Sr" + cRightAscension, false);
             CommandString(":Sd" + cDeclination, false);
@@ -1352,12 +1253,12 @@ namespace ASCOM.DeltaCodeV3
             {
                 if (m_bTargetDeclinationSet)
                 {
-                    tl.LogMessage("TargetDeclination", "Get - " + utilities.HoursToHMS(m_fTargetDeclination));
+                    LogMessage("TargetDeclination", "Get - " + utilities.HoursToHMS(m_fTargetDeclination));
                     return m_fTargetDeclination;
                 }
                 else
                 {
-                    tl.LogMessage("TargetDeclination", "Get - Value not set");
+                    LogMessage("TargetDeclination", "Get - Value not set");
                     throw new ASCOM.ValueNotSetException ("TargetDeclination");
                 }
             }
@@ -1365,13 +1266,13 @@ namespace ASCOM.DeltaCodeV3
             {
                 if (value >= -90.0 && value <= 90.0)
                 {
-                    tl.LogMessage("TargetDeclination", "Set - " + utilities.HoursToHMS(value));
+                    LogMessage("TargetDeclination", "Set - " + utilities.HoursToHMS(value));
                     m_fTargetDeclination = value;
                     m_bTargetDeclinationSet = true;
                 }
                 else
                 {
-                    tl.LogMessage("TargetDeclination", "Set - Invalid value" + utilities.HoursToHMS(value));
+                    LogMessage("TargetDeclination", "Set - Invalid value" + utilities.HoursToHMS(value));
                     throw new ASCOM.InvalidValueException("TargetDeclination", value.ToString(), "-90 to +90");
                 }
             }
@@ -1383,12 +1284,12 @@ namespace ASCOM.DeltaCodeV3
             {
                 if (m_bTargetRightascensionSet)
                 {
-                    tl.LogMessage("TargetRightAscension", "Get - " + utilities.HoursToHMS(m_fTargetRightascension));
+                    LogMessage("TargetRightAscension", "Get - " + utilities.HoursToHMS(m_fTargetRightascension));
                     return m_fTargetRightascension;
                 }
                 else
                 {
-                    tl.LogMessage("TargetRightAscension", "Get - Value not set");
+                    LogMessage("TargetRightAscension", "Get - Value not set");
                     throw new ASCOM.ValueNotSetException("TargetRightAscension");
                 }
             }
@@ -1396,13 +1297,13 @@ namespace ASCOM.DeltaCodeV3
             {
                 if (value >= 0.0 && value <= 24.0)
                 {
-                    tl.LogMessage("TargetRightAscension", "Set - " + utilities.HoursToHMS(value));
+                    LogMessage("TargetRightAscension", "Set - " + utilities.HoursToHMS(value));
                     m_fTargetRightascension = value;
                     m_bTargetRightascensionSet = true;
                 }
                 else
                 {
-                    tl.LogMessage("TargetRightAscension", "Set - Invalid value" + utilities.HoursToHMS(value));
+                    LogMessage("TargetRightAscension", "Set - Invalid value" + utilities.HoursToHMS(value));
                     throw new ASCOM.InvalidValueException("TargetRightAscension", value.ToString(), "0 to 24");
                 }
             }
@@ -1413,12 +1314,12 @@ namespace ASCOM.DeltaCodeV3
             get
             {
                 bool tracking = true;
-                tl.LogMessage("Tracking", "Get - " + tracking.ToString());
+                LogMessage("Tracking", "Get - " + tracking.ToString());
                 return tracking;
             }
             set
             {
-                tl.LogMessage("Tracking Set", "Not implemented");
+                LogMessage("Tracking Set", "Not implemented");
                 throw new ASCOM.PropertyNotImplementedException("Tracking", true);
             }
         }
@@ -1427,12 +1328,12 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                tl.LogMessage("TrackingRate", "Get - " + DriveRates.driveSidereal.ToString());
+                LogMessage("TrackingRate", "Get - " + DriveRates.driveSidereal.ToString());
                 return DriveRates.driveSidereal;
             }
             set
             {
-                tl.LogMessage("TrackingRate Set", "OK");
+                LogMessage("TrackingRate Set", "OK");
 
                 ITrackingRates trackingRates = new TrackingRates();
                 foreach (DriveRates driveRate in trackingRates)
@@ -1454,13 +1355,13 @@ namespace ASCOM.DeltaCodeV3
 
                 foreach (DriveRates driveRate in trackingRates)
                 {
-                    tl.LogMessage("TrackingRates", "Get - " + driveRate.ToString());
+                    LogMessage("TrackingRates", "Get - " + driveRate.ToString());
                 }
                 return trackingRates;
             }
             set
             {
-                tl.LogMessage("TrackingRates Set", "Not implemented");
+                LogMessage("TrackingRates Set", "Not implemented");
                 throw new ASCOM.PropertyNotImplementedException("TrackingRates", true);
             }
         }
@@ -1470,19 +1371,19 @@ namespace ASCOM.DeltaCodeV3
             get
             {
                 DateTime utcDate = DateTime.UtcNow;
-                tl.LogMessage("UTCDate", "Get - " + String.Format("MM/dd/yy HH:mm:ss", utcDate));
+                LogMessage("UTCDate", "Get - " + String.Format("MM/dd/yy HH:mm:ss", utcDate));
                 return utcDate;
             }
             set
             {
-                tl.LogMessage("UTCDate Set", "Not implemented");
+                LogMessage("UTCDate Set", "Not implemented");
                 throw new ASCOM.PropertyNotImplementedException("UTCDate", true);
             }
         }
 
         public void Unpark()
         {
-            tl.LogMessage("Unpark", "OK");
+            LogMessage("Unpark", "OK");
             CommandBlind(":PO", false);
         }
 
@@ -1490,19 +1391,6 @@ namespace ASCOM.DeltaCodeV3
 
 
 #region Private properties and methods
-        // here are some useful properties and methods that can be used as required
-        // to help with driver development
-        /// <summary>
-        /// Returns true if there is a valid connection to the driver hardware
-        /// </summary>
-        private bool IsConnected
-        {
-            get
-            {
-                // TODO check that the driver hardware connection exists and is connected to the hardware
-                return SharedResources.SharedSerial.Connected;
-            }
-        }
 
         /// <summary>
         /// Use this function to throw an exception if we aren't connected to the hardware
@@ -1510,116 +1398,30 @@ namespace ASCOM.DeltaCodeV3
         /// <param name="message"></param>
         private void CheckConnected(string message)
         {
-            if (!IsConnected)
-            {
-                throw new ASCOM.NotConnectedException(message);
-            }
+            SharedResources.CheckConnected(message);
         }
 
         /// <summary>
-        /// Read the device configuration from the ASCOM Profile store
+        /// Log helper function that takes formatted strings and arguments
         /// </summary>
-        internal void ReadProfile()
+        /// <param name="identifier"></param>
+        /// <param name="message"></param>
+        /// <param name="args"></param>
+        private void LogMessage(string identifier, string message)
         {
-            SharedResources.ReadProfile();
-
-            using (Profile driverProfile = new Profile())
-            {
-                driverProfile.DeviceType = "Telescope";
-                traceState = Convert.ToBoolean(driverProfile.GetValue(driverID, traceStateProfileName, string.Empty, traceStateDefault));
-            }
+            tl.LogMessage("Telescope." + identifier, message);
         }
 
-        /// <summary>
-        /// Write the device configuration to the  ASCOM  Profile store
-        /// </summary>
-        internal void WriteProfile()
-        {
-            SharedResources.WriteProfile();
 
-            using (Profile driverProfile = new Profile())
-            {
-                driverProfile.DeviceType = "Telescope";
-                driverProfile.WriteValue(driverID, traceStateProfileName, traceState.ToString());
-            }
+        private void LogMessage(string identifier, string message, params object[] args)
+        {
+            var msg = string.Format(message, args);
+            tl.LogMessage("Telescope." + identifier, msg);
         }
 
-#endregion
+        #endregion
 
 
-#region ASCOM Registration
-
-        //// Register or unregister driver for ASCOM. This is harmless if already
-        //// registered or unregistered. 
-        ////
-        ///// <summary>
-        ///// Register or unregister the driver with the ASCOM Platform.
-        ///// This is harmless if the driver is already registered/unregistered.
-        ///// </summary>
-        ///// <param name="bRegister">If <c>true</c>, registers the driver, otherwise unregisters it.</param>
-        //private static void RegUnregASCOM(bool bRegister)
-        //{
-        //    using (var P = new ASCOM.Utilities.Profile())
-        //    {
-        //        P.DeviceType = "Telescope";
-        //        if (bRegister)
-        //        {
-        //            P.Register(driverID, driverDescription);
-        //        }
-        //        else
-        //        {
-        //            P.Unregister(driverID);
-        //        }
-        //    }
-        //}
-
-        ///// <summary>
-        ///// This function registers the driver with the ASCOM Chooser and
-        ///// is called automatically whenever this class is registered for COM Interop.
-        ///// </summary>
-        ///// <param name="t">Type of the class being registered, not used.</param>
-        ///// <remarks>
-        ///// This method typically runs in two distinct situations:
-        ///// <list type="numbered">
-        ///// <item>
-        ///// In Visual Studio, when the project is successfully built.
-        ///// For this to work correctly, the option <c>Register for COM Interop</c>
-        ///// must be enabled in the project settings.
-        ///// </item>
-        ///// <item>During setup, when the installer registers the assembly for COM Interop.</item>
-        ///// </list>
-        ///// This technique should mean that it is never necessary to manually register a driver with ASCOM.
-        ///// </remarks>
-        //[ComRegisterFunction]
-        //public static void RegisterASCOM(Type t)
-        //{
-        //    RegUnregASCOM(true);
-        //}
-
-        ///// <summary>
-        ///// This function unregisters the driver from the ASCOM Chooser and
-        ///// is called automatically whenever this class is unregistered from COM Interop.
-        ///// </summary>
-        ///// <param name="t">Type of the class being registered, not used.</param>
-        ///// <remarks>
-        ///// This method typically runs in two distinct situations:
-        ///// <list type="numbered">
-        ///// <item>
-        ///// In Visual Studio, when the project is cleaned or prior to rebuilding.
-        ///// For this to work correctly, the option <c>Register for COM Interop</c>
-        ///// must be enabled in the project settings.
-        ///// </item>
-        ///// <item>During uninstall, when the installer unregisters the assembly from COM Interop.</item>
-        ///// </list>
-        ///// This technique should mean that it is never necessary to manually unregister a driver from ASCOM.
-        ///// </remarks>
-        //[ComUnregisterFunction]
-        //public static void UnregisterASCOM(Type t)
-        //{
-        //    RegUnregASCOM(false);
-        //}
-
-#endregion
 
     }
 }

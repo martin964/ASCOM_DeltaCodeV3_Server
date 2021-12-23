@@ -85,7 +85,7 @@ namespace ASCOM.DeltaCodeV3
                     break;
             }
 
-            if (SharedResources.SharedSerial.Connected)
+            if (SharedResources.Connected)
             {
                 boxSerialComPort  .Enabled = false;
                 radioBaudrate9600 .Enabled = false;
@@ -167,5 +167,9 @@ namespace ASCOM.DeltaCodeV3
             }
         }
 
+        private void SetupDialogForm_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

@@ -32,7 +32,6 @@ namespace ASCOM.DeltaCodeV3
             this.cmdOK = new System.Windows.Forms.Button();
             this.cmdCancel = new System.Windows.Forms.Button();
             this.picASCOM = new System.Windows.Forms.PictureBox();
-            this.label2 = new System.Windows.Forms.Label();
             this.chkTrace = new System.Windows.Forms.CheckBox();
             this.boxSerialComPort = new System.Windows.Forms.ComboBox();
             this.radioBaudrate9600 = new System.Windows.Forms.RadioButton();
@@ -77,15 +76,6 @@ namespace ASCOM.DeltaCodeV3
             this.picASCOM.TabIndex = 9;
             this.picASCOM.TabStop = false;
             // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(13, 25);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(58, 13);
-            this.label2.TabIndex = 5;
-            this.label2.Text = "Comm Port";
-            // 
             // chkTrace
             // 
             this.chkTrace.AutoSize = true;
@@ -99,7 +89,7 @@ namespace ASCOM.DeltaCodeV3
             // boxSerialComPort
             // 
             this.boxSerialComPort.FormattingEnabled = true;
-            this.boxSerialComPort.Location = new System.Drawing.Point(77, 23);
+            this.boxSerialComPort.Location = new System.Drawing.Point(77, 29);
             this.boxSerialComPort.Margin = new System.Windows.Forms.Padding(2);
             this.boxSerialComPort.Name = "boxSerialComPort";
             this.boxSerialComPort.Size = new System.Drawing.Size(92, 21);
@@ -141,11 +131,11 @@ namespace ASCOM.DeltaCodeV3
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(13, 26);
+            this.label1.Location = new System.Drawing.Point(13, 32);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(58, 13);
+            this.label1.Size = new System.Drawing.Size(50, 13);
             this.label1.TabIndex = 5;
-            this.label1.Text = "Comm Port";
+            this.label1.Text = "Com Port";
             // 
             // label3
             // 
@@ -179,7 +169,6 @@ namespace ASCOM.DeltaCodeV3
             this.Controls.Add(this.chkTrace);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.label2);
             this.Controls.Add(this.picASCOM);
             this.Controls.Add(this.cmdCancel);
             this.Controls.Add(this.cmdOK);
@@ -189,7 +178,8 @@ namespace ASCOM.DeltaCodeV3
             this.Name = "SetupDialogForm";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "DeltaCodeV3 Server 1.3.0 / 2021-11-21";
+            this.Text = "DeltaCodeV3 Server 2.0.0 pre1 / 2021-12-23";
+            this.Load += new System.EventHandler(this.SetupDialogForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.picASCOM)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -201,7 +191,6 @@ namespace ASCOM.DeltaCodeV3
         private System.Windows.Forms.Button cmdOK;
         private System.Windows.Forms.Button cmdCancel;
         private System.Windows.Forms.PictureBox picASCOM;
-        private System.Windows.Forms.Label label2;
         private System.Windows.Forms.CheckBox chkTrace;
         private System.Windows.Forms.ComboBox boxSerialComPort;
         private System.Windows.Forms.RadioButton radioBaudrate9600;

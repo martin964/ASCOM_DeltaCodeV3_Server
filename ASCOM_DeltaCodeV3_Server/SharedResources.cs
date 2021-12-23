@@ -36,13 +36,16 @@ namespace ASCOM.DeltaCodeV3
         private static readonly object lockObject = new object();
 
         // Shared serial port. This will allow multiple drivers to use one single serial port.
-		private static ASCOM.Utilities.Serial s_sharedSerial = new ASCOM.Utilities.Serial();		// Shared serial port
-		private static int s_z = 0;     // counter for the number of connections to the serial port
+		private static ASCOM.Utilities.Serial   s_sharedSerial    = new ASCOM.Utilities.Serial();		// Shared serial port
+		private static int                      s_nNoOfConnections = 0;     // counter for the number of connections to the serial port
 
         //
         // Public access to shared resources
         //
+        public static string    traceStateProfileName = "Trace Level";
+        public static string    traceStateDefault = "false";
         public static bool      traceState;
+
         public static string    comPortProfileName = "COM Port";
         public static string    comPortProfileSpeed = "COM Port Speed";
         public static string    comPortDefault = "COM1";
@@ -54,30 +57,70 @@ namespace ASCOM.DeltaCodeV3
         public static string    timeoutHandlingStateDefault = "false";
         internal static bool    timeoutHandlingState;
 
-        #region single serial port connector
-        //
-        // this region shows a way that a single serial port could be connected to by multiple 
-        // drivers.
-        //
-        // Connected is used to handle the connections to the port.
-        //
-        // SendMessage is a way that messages could be sent to the hardware without
-        // conflicts between different drivers.
-        //
-        // All this is for a single connection, multiple connections would need multiple ports
-        // and a way to handle connecting and disconnection from them - see the
-        // multi driver handling section for ideas.
-        //
+
+#region singe_setup_dialog
+
+        /// <summary>
+        /// Displays the Setup Dialog form.
+        /// If the user clicks the OK button to dismiss the form, then
+        /// the new settings are saved, otherwise the old values are reloaded.
+        /// THIS IS THE ONLY PLACE WHERE SHOWING USER INTERFACE IS ALLOWED!
+        /// </summary>
+        /// 
+        public static void SetupDialog()
+        {
+            // consider only showing the setup dialog if not connected
+            // or call a different dialog if connected
+
+            if (Connected)
+            {
+                System.Windows.Forms.MessageBox.Show("Already connected, just press OK");
+            }
+
+            using (SetupDialogForm frmSetup = new SetupDialogForm())
+            {
+                System.Windows.Forms.DialogResult result = frmSetup.ShowDialog();
+                if (result == System.Windows.Forms.DialogResult.OK)
+                {
+                    //  Persist device configuration values to the ASCOM Profile store
+                    //  
+                    WriteProfile();
+                }
+            }
+        }
+
+#endregion
+
+#region single_trace_object
+
+        /// <summary>
+        /// Variable to hold the trace logger object (creates a diagnostic log file with information that you specify)
+        /// </summary>
+        private static TraceLogger tl;
+
+        public static TraceLogger TraceLogger
+        {
+            get
+            {
+                if (tl == null)
+                {
+                    tl = new TraceLogger("DeltaCodeV3");
+                    tl.Enabled = traceState;
+                }
+                return tl;
+            }
+        }
+
+#endregion
+
+
+#region single serial port connector
 
         /// <summary>
         /// Shared serial port
         /// </summary>
-        public static ASCOM.Utilities.Serial SharedSerial { get { return s_sharedSerial; } }
-
-        /// <summary>
-        /// number of connections to the shared serial port
-        /// </summary>
-        public static int connections { get { return s_z; } set { s_z = value; } }
+        /// 
+        private static ASCOM.Utilities.Serial SharedSerial { get { return s_sharedSerial; } }
 
         /// <summary>
         /// Example of a shared SendMessage method, the lock
@@ -97,44 +140,132 @@ namespace ASCOM.DeltaCodeV3
             }
         }
 
-        /// <summary>
-        /// Example of handling connecting to and disconnection from the
-        /// shared serial port.
-        /// Needs error handling
-        /// the port name etc. needs to be set up first, this could be done by the driver
-        /// checking Connected and if it's false setting up the port before setting connected to true.
-        /// It could also be put here.
-        /// </summary>
-        //public static bool Connected
-        //{
-        //    set
-        //    {
-        //        lock (lockObject)
-        //        {
-        //            if (value)
-        //            {
-        //                if (s_z == 0)
-        //                    SharedSerial.Connected = true;
-        //                s_z++;
-        //            }
-        //            else
-        //            {
-        //                s_z--;
-        //                if (s_z <= 0)
-        //                {
-        //                    SharedSerial.Connected = false;
-        //                }
-        //            }
-        //        }
-        //    }
-        //    get { return SharedSerial.Connected; }
-        //}
+        public static void CommandBlind(string command, bool raw)
+        {
+            CheckConnected("CommandBlind");
 
-        public static void Connect (TraceLogger tl)
+            SharedSerial.ClearBuffers();
+            if (raw)
+            {
+                tl.LogMessage("CommandBlind", String.Format("command=<{0}>, raw={1}", command, raw));
+                SharedSerial.Transmit(command);
+            }
+            else
+            {
+                tl.LogMessage("CommandBlind", String.Format("command=<{0}>, raw={1}", command, raw));
+                SharedSerial.Transmit(command + '#');
+            }
+        }
+
+
+        /// <summary>
+        /// Send a command to the telescope, receive an answer string.
+        /// The received string is checked and converted into a boolean result.
+        /// </summary>
+        /// <param name="command">Command string sent to the telescope</param>
+        /// <param name="raw">Flag for raw command, will not be extended by a '#'</param>
+        /// <returns>Flag for success</returns>
+        /// 
+        public static bool CommandBool(string command, bool raw)
+        {
+            CheckConnected("CommandBool");
+
+            string ret = CommandString(command, raw).ToUpper();
+            tl.LogMessage("CommandBool", String.Format("command=<{0}>, raw={1}, return=<{2}>", command, raw, ret));
+
+            if (ret == "1" || ret == "TRUE" || ret == "YES")
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+
+        public static string CommandString(string command, bool raw)
+        {
+            string cResponse;
+            string cEndChar;
+
+            CheckConnected("CommandString");
+
+            SharedSerial.ClearBuffers();
+
+            if (raw)
+            {
+                cEndChar = command.Substring(command.Length - 1);
+                SharedSerial.Transmit(command);
+            }
+            else
+            {
+                cEndChar = "#";
+                SharedSerial.Transmit(command + cEndChar);
+            }
+
+            cResponse = SharedSerial.ReceiveTerminated(cEndChar);
+            tl.LogMessage("CommandString", String.Format("command=<{0}>, raw={1}, return=<{2}>", command, raw, cResponse));
+
+            if (cResponse.EndsWith(cEndChar))
+            {
+                cResponse = cResponse.TrimEnd(new char[] { cEndChar[0] });
+            }
+            return cResponse;
+        }
+
+
+        /// <summary>
+        /// Use this function to throw an exception if we aren't connected to the hardware
+        /// </summary>
+        /// <param name="message"></param>
+        public static void CheckConnected(string message)
+        {
+            if (!SharedSerial.Connected)
+            {
+                throw new ASCOM.NotConnectedException(message);
+            }
+        }
+
+
+        /// <summary>
+        /// Property:
+        /// Connect/disconnect the controller or ask if the controller is connected
+        /// </summary>     
+        /// 
+        public static bool Connected
+        {
+            get
+            {
+                return SharedSerial.Connected;
+            }
+            set
+            {
+                lock (lockObject)
+                {
+                    if (value)
+                    {
+                        if (s_nNoOfConnections == 0)
+                        {
+                            Connect();
+                        }
+                        s_nNoOfConnections++;
+                    }
+                    else
+                    {
+                        if (s_nNoOfConnections == 1)
+                        {
+                            Disconnect();
+                        }
+                    }
+                }
+            }
+        }
+
+
+        public static void Connect ()
         {
             ReadProfile();
-
-            tl.LogMessage("Connected Set", "Connecting to port " + comPort);
 
             if (string.IsNullOrEmpty(comPort))
             {
@@ -170,7 +301,7 @@ namespace ASCOM.DeltaCodeV3
             }
         }
 
-        public static void Disconnect(TraceLogger tl)
+        public static void Disconnect()
         {
             if (SharedSerial != null)
             {
@@ -180,7 +311,9 @@ namespace ASCOM.DeltaCodeV3
                 }
             }
         }
+#endregion
 
+#region Profiles
         /// <summary>
         /// Read the device configuration from the ASCOM Profile store
         /// </summary>
@@ -192,6 +325,9 @@ namespace ASCOM.DeltaCodeV3
                 timeoutHandlingState = Convert.ToBoolean(driverProfile.GetValue("ASCOM.DeltaCodeV3.Telescope", timeoutHandlingStateProfileName, string.Empty, timeoutHandlingStateDefault));
                 comPort = driverProfile.GetValue("ASCOM.DeltaCodeV3.Telescope", comPortProfileName, string.Empty, comPortDefault);
                 comPortSpeed = driverProfile.GetValue("ASCOM.DeltaCodeV3.Telescope", comPortProfileSpeed, string.Empty, comPortSpeedDefault);
+
+                string cTraceLevel = driverProfile.GetValue("ASCOM.DeltaCodeV3.Telescope", traceStateProfileName, string.Empty, traceStateDefault);
+                traceState = cTraceLevel.ToLower() == "true" ? true : false;
             }
         }
 
@@ -206,105 +342,12 @@ namespace ASCOM.DeltaCodeV3
                 driverProfile.WriteValue("ASCOM.DeltaCodeV3.Telescope", timeoutHandlingStateProfileName, timeoutHandlingState.ToString());
                 driverProfile.WriteValue("ASCOM.DeltaCodeV3.Telescope", comPortProfileName, comPort.ToString());
                 driverProfile.WriteValue("ASCOM.DeltaCodeV3.Telescope", comPortProfileSpeed, comPortSpeed.ToString());
+
+                driverProfile.WriteValue("ASCOM.DeltaCodeV3.Telescope", traceStateProfileName, traceState.ToString());
             }
         }
 
-        #endregion
-
-        #region Multi Driver handling
-        // this section illustrates how multiple drivers could be handled,
-        // it's for drivers where multiple connections to the hardware can be made and ensures that the
-        // hardware is only disconnected from when all the connected devices have disconnected.
-
-        // It is NOT a complete solution!  This is to give ideas of what can - or should be done.
-        //
-        // An alternative would be to move the hardware control here, handle connecting and disconnecting,
-        // and provide the device with a suitable connection to the hardware.
-        //
-        /// <summary>
-        /// dictionary carrying device connections.
-        /// The Key is the connection number that identifies the device, it could be the COM port name,
-        /// USB ID or IP Address, the Value is the DeviceHardware class
-        /// </summary>
-        private static Dictionary<string, DeviceHardware> connectedDevices = new Dictionary<string, DeviceHardware>();
-
-        /// <summary>
-        /// This is called in the driver Connect(true) property,
-        /// it add the device id to the list of devices if it's not there and increments the device count.
-        /// </summary>
-        /// <param name="deviceId"></param>
-        public static void Connect(string deviceId)
-        {
-            lock (lockObject)
-            {
-                if (!connectedDevices.ContainsKey(deviceId))
-                    connectedDevices.Add(deviceId, new DeviceHardware());
-                connectedDevices[deviceId].count++;       // increment the value
-            }
-        }
-
-        public static void Disconnect(string deviceId)
-        {
-            lock (lockObject)
-            {
-                if (connectedDevices.ContainsKey(deviceId))
-                {
-                    connectedDevices[deviceId].count--;
-                    if (connectedDevices[deviceId].count <= 0)
-                        connectedDevices.Remove(deviceId);
-                }
-            }
-        }
-
-        public static bool IsConnected(string deviceId)
-        {
-            if (connectedDevices.ContainsKey(deviceId))
-                return (connectedDevices[deviceId].count > 0);
-            else
-                return false;
-        }
-
-        #endregion
+#endregion
 
     }
-
-    /// <summary>
-    /// Skeleton of a hardware class, all this does is hold a count of the connections,
-    /// in reality extra code will be needed to handle the hardware in some way
-    /// </summary>
-    public class DeviceHardware
-    {
-        internal int count { set; get; }
-
-        internal DeviceHardware()
-        {
-            count = 0;
-        }
-    }
-
-    //#region ServedClassName attribute
-    ///// <summary>
-    ///// This is only needed if the driver is targeted at  platform 5.5, it is included with Platform 6
-    ///// </summary>
-    //[global::System.AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
-    //public sealed class ServedClassNameAttribute : Attribute
-    //{
-    //    // See the attribute guidelines at 
-    //    //  http://go.microsoft.com/fwlink/?LinkId=85236
-
-    //    /// <summary>
-    //    /// Gets or sets the 'friendly name' of the served class, as registered with the ASCOM Chooser.
-    //    /// </summary>
-    //    /// <value>The 'friendly name' of the served class.</value>
-    //    public string DisplayName { get; private set; }
-    //    /// <summary>
-    //    /// Initializes a new instance of the <see cref="ServedClassNameAttribute"/> class.
-    //    /// </summary>
-    //    /// <param name="servedClassName">The 'friendly name' of the served class.</param>
-    //    public ServedClassNameAttribute(string servedClassName)
-    //    {
-    //        DisplayName = servedClassName;
-    //    }
-    //}
-    //#endregion
 }
