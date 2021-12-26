@@ -75,6 +75,7 @@ namespace ASCOM.DeltaCodeV3
             if (Connected)
             {
                 System.Windows.Forms.MessageBox.Show("Already connected, just press OK");
+                return;
             }
 
             using (SetupDialogForm frmSetup = new SetupDialogForm())
