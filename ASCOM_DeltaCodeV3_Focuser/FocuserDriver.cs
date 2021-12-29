@@ -33,6 +33,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Windows.Forms;
 
 using ASCOM;
 using ASCOM.Astrometry;
@@ -58,7 +59,7 @@ namespace ASCOM.DeltaCodeV3
     /// </summary>
     [Guid("c139eb83-17c0-4ef6-bbd1-65e35928a9cd")]
     [ProgId("ASCOM.DeltaCodeV3.Focuser")]
-    [ServedClassName("Focuser Driver for DeltaCodeV3")]
+    [ServedClassName("DeltaCode V3 Focuser")]
     [ClassInterface(ClassInterfaceType.None)]
     public class Focuser : ReferenceCountedObjectBase, IFocuserV3
     {
@@ -72,7 +73,7 @@ namespace ASCOM.DeltaCodeV3
         /// <summary>
         /// Driver description that displays in the ASCOM Chooser.
         /// </summary>
-        private static string driverDescription = "Focuser Driver for DeltaCodeV3";
+        private static string driverDescription = "DeltaCode V3 Focuser";
 
         /// <summary>
         /// Private variable to hold an ASCOM Utilities object
@@ -95,6 +96,7 @@ namespace ASCOM.DeltaCodeV3
         /// </summary>
         public Focuser()
         {
+            //MessageBox.Show("Focuser Constructor");
             driverID = Marshal.GenerateProgIdForType(this.GetType());
 
             SharedResources.ReadProfile(); // Read device configuration from the ASCOM Profile store

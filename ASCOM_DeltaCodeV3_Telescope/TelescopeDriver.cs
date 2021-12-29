@@ -29,6 +29,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 using ASCOM;
 using ASCOM.Astrometry;
@@ -56,7 +57,7 @@ namespace ASCOM.DeltaCodeV3
     /// 
     [Guid("6B16CEBB-6892-4C28-96C3-A202D1C2746B")]
     [ProgId("ASCOM.DeltaCodeV3.Telescope")]
-    [ServedClassName("Telescope Driver for DeltaCodeV3")]
+    [ServedClassName("DeltaCode V3 Telescope")]
     [ClassInterface(ClassInterfaceType.None)]
 
     public class Telescope : ReferenceCountedObjectBase, ITelescopeV3
@@ -72,7 +73,7 @@ namespace ASCOM.DeltaCodeV3
         /// Driver description that displays in the ASCOM Chooser.
         /// </summary>
         /// 
-        private static string driverDescription = "Telescope Driver for DeltaCodeV3";
+        private static string driverDescription = "DeltaCode V3 Telescope";
 
         /// <summary>
         /// Private variable to hold an ASCOM Utilities object
@@ -123,6 +124,7 @@ namespace ASCOM.DeltaCodeV3
         /// 
         public Telescope()
         {
+            //MessageBox.Show("Telescope Constructor");
             driverID = Marshal.GenerateProgIdForType(this.GetType());
 
             //  Read device configuration from the ASCOM Profile store
@@ -1138,6 +1140,17 @@ namespace ASCOM.DeltaCodeV3
 
         public void SlewToCoordinatesAsync(double fRightAscension, double fDeclination)
         {
+            // Check if mount is parked
+            //
+            string cMountStatus = CommandString(":Gstat", false);
+            bool bAtPark = cMountStatus == "5" ? true : false;
+
+            if (bAtPark)
+            {
+                LogMessage("SlewToCoordinatesAsync", "ERROR : Mount is parked");
+                throw new ASCOM.InvalidOperationException("SlewToCoordinatesAsync");
+            }
+
             LogMessage("SlewToCoordinatesAsync", "OK");
 
             string cRightAscension;
@@ -1173,6 +1186,17 @@ namespace ASCOM.DeltaCodeV3
 
         public void SlewToTargetAsync()
         {
+            // Check if mount is parked
+            //
+            string cMountStatus = CommandString(":Gstat", false);
+            bool bAtPark = cMountStatus == "5" ? true : false;
+
+            if (bAtPark)
+            {
+                LogMessage("SlewToTargetAsync", "ERROR : Mount is parked");
+                throw new ASCOM.InvalidOperationException("SlewToTargetAsync");
+            }
+
             LogMessage("SlewToTargetAsync", "OK");
 
             string cRightAscension;
@@ -1205,6 +1229,17 @@ namespace ASCOM.DeltaCodeV3
 
         public void SyncToCoordinates(double fRightAscension, double fDeclination)
         {
+            // Check if mount is parked
+            //
+            string cMountStatus = CommandString(":Gstat", false);
+            bool bAtPark = cMountStatus == "5" ? true : false;
+
+            if (bAtPark)
+            {
+                LogMessage("SyncToCoordinates", "ERROR : Mount is parked");
+                throw new ASCOM.InvalidOperationException("SyncToCoordinates");
+            }
+
             LogMessage("SyncToCoordinates", "OK");
 
             string cRightAscension;
@@ -1234,6 +1269,17 @@ namespace ASCOM.DeltaCodeV3
 
         public void SyncToTarget()
         {
+            // Check if mount is parked
+            //
+            string cMountStatus = CommandString(":Gstat", false);
+            bool bAtPark = cMountStatus == "5" ? true : false;
+
+            if (bAtPark)
+            {
+                LogMessage("SyncToTarget", "ERROR : Mount is parked");
+                throw new ASCOM.InvalidOperationException("SyncToTarget");
+            }
+
             string cRightAscension;
             string cDeclination;
 
@@ -1406,7 +1452,7 @@ namespace ASCOM.DeltaCodeV3
         /// </summary>
         /// <param name="identifier"></param>
         /// <param name="message"></param>
-        /// <param name="args"></param>
+        /// 
         private void LogMessage(string identifier, string message)
         {
             tl.LogMessage("Telescope." + identifier, message);

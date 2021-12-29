@@ -11,7 +11,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Setup", "Setup", "{25A49D94
 	ProjectSection(SolutionItems) = preProject
 		Setup\ASCOM_DeltaCodeV3_Server_Setup.exe = Setup\ASCOM_DeltaCodeV3_Server_Setup.exe
 		Setup\DeltaCodeV3 Setup.iss = Setup\DeltaCodeV3 Setup.iss
-		Setup\ReadMe.htm = Setup\ReadMe.htm
+		Setup\DeltacodeV3_ReadMe.htm = Setup\DeltacodeV3_ReadMe.htm
+		Setup\DeltaCodeV3_Setup_2_1_0.iss = Setup\DeltaCodeV3_Setup_2_1_0.iss
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASCOM_DeltaCodeV3_Focuser", "ASCOM_DeltaCodeV3_Focuser\ASCOM_DeltaCodeV3_Focuser.csproj", "{64308775-BD4A-469C-BCAB-3ED830B811AF}"

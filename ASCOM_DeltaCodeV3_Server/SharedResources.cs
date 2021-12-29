@@ -254,9 +254,14 @@ namespace ASCOM.DeltaCodeV3
                     }
                     else
                     {
-                        if (s_nNoOfConnections == 1)
+                        if (s_nNoOfConnections > 0)
                         {
-                            Disconnect();
+                            s_nNoOfConnections--;
+
+                            if (s_nNoOfConnections == 0)
+                            {
+                                Disconnect();
+                            }
                         }
                     }
                 }

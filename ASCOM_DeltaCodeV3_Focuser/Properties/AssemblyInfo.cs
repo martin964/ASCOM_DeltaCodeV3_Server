@@ -9,10 +9,10 @@ using System.Runtime.InteropServices;
 //
 // TODO - Add your authorship information here
 [assembly: AssemblyTitle("ASCOM.DeltaCodeV3.Focuser")]
-[assembly: AssemblyDescription("ASCOM Focuser driver for DeltaCodeV3")]
+[assembly: AssemblyDescription("DeltaCode V3 Focuser")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("The ASCOM Initiative")]
-[assembly: AssemblyProduct("ASCOM Focuser driver for DeltaCodeV3")]
+[assembly: AssemblyProduct("DeltaCode V3 Focuser")]
 [assembly: AssemblyCopyright("Copyright © 2021 The ASCOM Initiative")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -36,6 +36,6 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 //
 // TODO - Set your driver's version here
-[assembly: AssemblyVersion("2.0.1.0")]
-[assembly: AssemblyFileVersion("2.0.1.0")]
+[assembly: AssemblyVersion("2.1.0.0")]
+[assembly: AssemblyFileVersion("2.1.0.0")]
 [assembly: NeutralResourcesLanguage("en-US")]

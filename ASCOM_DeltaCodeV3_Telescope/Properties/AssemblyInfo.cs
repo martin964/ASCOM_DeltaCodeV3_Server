@@ -9,10 +9,10 @@ using System.Resources;
 //
 // TODO - Add your authorship information here
 [assembly: AssemblyTitle("ASCOM.DeltaCodeV3.Telescope")]
-[assembly: AssemblyDescription("ASCOM Telescope driver for DeltaCodeV3")]
+[assembly: AssemblyDescription("DeltaCode V3 Telescope")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("The ASCOM Initiative")]
-[assembly: AssemblyProduct("ASCOM Telescope Driver for DeltaCodeV3")]
+[assembly: AssemblyProduct("DeltaCode V3 Telescope")]
 [assembly: AssemblyCopyright("Copyright © 2014 The ASCOM Initiative")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -36,6 +36,6 @@ using System.Resources;
 // by using the '*' as shown below:
 //
 // TODO - Set your driver's version here
-[assembly: AssemblyVersion("2.0.1.0")]
-[assembly: AssemblyFileVersion("2.0.1.0")]
+[assembly: AssemblyVersion("2.1.0.0")]
+[assembly: AssemblyFileVersion("2.1.0.0")]
 [assembly: NeutralResourcesLanguage("en-US")]
