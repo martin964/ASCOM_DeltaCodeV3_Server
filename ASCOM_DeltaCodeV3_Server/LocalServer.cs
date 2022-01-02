@@ -141,14 +141,16 @@ namespace ASCOM.DeltaCodeV3
 		// This method performs a thread-safe incrementation of the objects count.
 		public static int CountObject()
 		{
-			// Increment the global count of objects.
+			//	MessageBox.Show("CountObject " + objsInUse.ToString() + " --> " + (objsInUse + 1).ToString());
+			//	Increment the global count of objects.
 			return Interlocked.Increment(ref objsInUse);
 		}
 
 		// This method performs a thread-safe decrementation the objects count.
 		public static int UncountObject()
 		{
-			// Decrement the global count of objects.
+			//	MessageBox.Show("UncountObject " + objsInUse.ToString() + " --> " + (objsInUse-1).ToString());
+			//	Decrement the global count of objects.
 			return Interlocked.Decrement(ref objsInUse);
 		}
 

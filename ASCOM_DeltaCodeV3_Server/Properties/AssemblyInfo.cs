@@ -7,10 +7,10 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("ASCOM.DeltaCodeV3")]
-[assembly: AssemblyDescription("DeltaCode V3 Server")]
+[assembly: AssemblyDescription("DeltaCodeV3 Server")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("ASCOM Initiative")]
-[assembly: AssemblyProduct("DeltaCode V3")]
+[assembly: AssemblyProduct("DeltaCodeV3")]
 [assembly: AssemblyCopyright("Copyright © 2021, Martin Cibulski")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -22,8 +22,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("2.1.0.0")]
-[assembly: AssemblyFileVersion("2.1.0.0")]
+[assembly: AssemblyVersion("2.1.1.0")]
+[assembly: AssemblyFileVersion("2.1.1.0")]
 
 [assembly: ComVisible(false)]
 [assembly: Guid("A7170DA8-1164-498C-AD4B-04FB3A1419AB")]

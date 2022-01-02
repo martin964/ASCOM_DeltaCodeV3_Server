@@ -145,16 +145,19 @@ namespace ASCOM.DeltaCodeV3
         {
             CheckConnected("CommandBlind");
 
-            SharedSerial.ClearBuffers();
-            if (raw)
+            lock (lockObject)
             {
-                tl.LogMessage("CommandBlind", String.Format("command=<{0}>, raw={1}", command, raw));
-                SharedSerial.Transmit(command);
-            }
-            else
-            {
-                tl.LogMessage("CommandBlind", String.Format("command=<{0}>, raw={1}", command, raw));
-                SharedSerial.Transmit(command + '#');
+                SharedSerial.ClearBuffers();
+                if (raw)
+                {
+                    tl.LogMessage("CommandBlind", String.Format("command=<{0}>, raw={1}", command, raw));
+                    SharedSerial.Transmit(command);
+                }
+                else
+                {
+                    tl.LogMessage("CommandBlind", String.Format("command=<{0}>, raw={1}", command, raw));
+                    SharedSerial.Transmit(command + '#');
+                }
             }
         }
 
@@ -171,48 +174,54 @@ namespace ASCOM.DeltaCodeV3
         {
             CheckConnected("CommandBool");
 
-            string ret = CommandString(command, raw).ToUpper();
-            tl.LogMessage("CommandBool", String.Format("command=<{0}>, raw={1}, return=<{2}>", command, raw, ret));
+            lock (lockObject)
+            {
+                string ret = CommandString(command, raw).ToUpper();
+                tl.LogMessage("CommandBool", String.Format("command=<{0}>, raw={1}, return=<{2}>", command, raw, ret));
 
-            if (ret == "1" || ret == "TRUE" || ret == "YES")
-            {
-                return true;
-            }
-            else
-            {
-                return false;
+                if (ret == "1" || ret == "TRUE" || ret == "YES")
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
         }
 
 
         public static string CommandString(string command, bool raw)
         {
-            string cResponse;
-            string cEndChar;
-
             CheckConnected("CommandString");
 
-            SharedSerial.ClearBuffers();
-
-            if (raw)
+            lock (lockObject)
             {
-                cEndChar = command.Substring(command.Length - 1);
-                SharedSerial.Transmit(command);
-            }
-            else
-            {
-                cEndChar = "#";
-                SharedSerial.Transmit(command + cEndChar);
-            }
+                string cResponse;
+                string cEndChar;
 
-            cResponse = SharedSerial.ReceiveTerminated(cEndChar);
-            tl.LogMessage("CommandString", String.Format("command=<{0}>, raw={1}, return=<{2}>", command, raw, cResponse));
+                SharedSerial.ClearBuffers();
 
-            if (cResponse.EndsWith(cEndChar))
-            {
-                cResponse = cResponse.TrimEnd(new char[] { cEndChar[0] });
+                if (raw)
+                {
+                    cEndChar = command.Substring(command.Length - 1);
+                    SharedSerial.Transmit(command);
+                }
+                else
+                {
+                    cEndChar = "#";
+                    SharedSerial.Transmit(command + cEndChar);
+                }
+
+                cResponse = SharedSerial.ReceiveTerminated(cEndChar);
+                tl.LogMessage("CommandString", String.Format("command=<{0}>, raw={1}, return=<{2}>", command, raw, cResponse));
+
+                if (cResponse.EndsWith(cEndChar))
+                {
+                    cResponse = cResponse.TrimEnd(new char[] { cEndChar[0] });
+                }
+                return cResponse;
             }
-            return cResponse;
         }
 
 

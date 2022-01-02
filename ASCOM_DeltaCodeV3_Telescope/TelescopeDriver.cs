@@ -28,6 +28,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
+using System.Threading;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
@@ -811,14 +812,22 @@ namespace ASCOM.DeltaCodeV3
 
         public void MoveAxis(TelescopeAxes Axis, double Rate)
         {
+            // Check if mount is parked
+            //
+            string cMountStatus = CommandString(":Gstat", false);
+            bool bAtPark = cMountStatus == "5" ? true : false;
+
+            if (bAtPark)
+            {
+                throw new ASCOM.InvalidValueException("MoveAxis");
+            }
+
             LogMessage("MoveAxis", "OK");
 
             AxisRates oRates = new AxisRates(Axis);
 
             bool bNegative = (Rate < 0.0) ? true : false;
             Rate = Math.Abs(Rate);
-
-            //throw new ASCOM.MethodNotImplementedException("MoveAxis");
 
             if (Axis == TelescopeAxes.axisPrimary)
             {
@@ -909,11 +918,25 @@ namespace ASCOM.DeltaCodeV3
         {
             LogMessage("Park", "OK");
             CommandBlind(":hP", false);
+
+            //  give DeltaCode time to  calculate Parked status
+            //
+            Thread.Sleep(500);
         }
 
 
         public void PulseGuide(GuideDirections Direction, int Duration)
         {
+            // Check if mount is parked
+            //
+            string cMountStatus = CommandString(":Gstat", false);
+            bool bAtPark = cMountStatus == "5" ? true : false;
+
+            if (bAtPark)
+            {
+                throw new ASCOM.InvalidValueException("MoveAxis");
+            }
+
             string cDurationMS = Duration.ToString();
 
             switch (Direction)
@@ -1012,26 +1035,29 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                CheckConnected("SideOfPier.get");
+                LogMessage("SideOfPier Get", "Not implemented");
+                throw new ASCOM.PropertyNotImplementedException("SideOfPier", false);
 
-                string      cPS;
-                PierSide    ps;
+                //CheckConnected("SideOfPier.get");
 
-                cPS = CommandString(":pS", false);
-                switch (cPS)
-                {
-                    case "East":
-                        ps = PierSide.pierEast;
-                        break;
-                    case "West":
-                        ps = PierSide.pierWest;
-                        break;
-                    default:
-                        ps = PierSide.pierUnknown;
-                        break;
-                }
-                LogMessage("SideOfPier", "Get - " + ps.ToString());
-                return ps;
+                //string      cPS;
+                //PierSide    ps;
+
+                //cPS = CommandString(":pS", false);
+                //switch (cPS)
+                //{
+                //    case "East":
+                //        ps = PierSide.pierEast;
+                //        break;
+                //    case "West":
+                //        ps = PierSide.pierWest;
+                //        break;
+                //    default:
+                //        ps = PierSide.pierUnknown;
+                //        break;
+                //}
+                //LogMessage("SideOfPier", "Get - " + ps.ToString());
+                //return ps;
             }
             set
             {
@@ -1080,8 +1106,8 @@ namespace ASCOM.DeltaCodeV3
             }
             set //  :StsDD*MM:SS#
             {
-                string cLat = utilities.DegreesToDMS(value, ":", ":");
-                LogMessage("SiteLatitude", "Set - " + cLat);
+                LogMessage("SiteLatitude Set", "Not implemented");
+                throw new ASCOM.PropertyNotImplementedException("SiteLatitude", true);
             }
         }
 
