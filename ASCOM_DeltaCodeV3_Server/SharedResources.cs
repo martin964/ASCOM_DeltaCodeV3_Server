@@ -170,14 +170,14 @@ namespace ASCOM.DeltaCodeV3
         /// <param name="raw">Flag for raw command, will not be extended by a '#'</param>
         /// <returns>Flag for success</returns>
         /// 
-        public static bool CommandBool(string command, bool raw)
+        public static bool CommandBool(string cLogPrefix, string command, bool raw)
         {
             CheckConnected("CommandBool");
 
             lock (lockObject)
             {
-                string ret = CommandString(command, raw).ToUpper();
-                tl.LogMessage("CommandBool", String.Format("command=<{0}>, raw={1}, return=<{2}>", command, raw, ret));
+                string ret = CommandString(cLogPrefix, command, raw).ToUpper();
+                tl.LogMessage(cLogPrefix + "CommandBool", String.Format("command=<{0}>, raw={1}, return=<{2}>", command, raw, ret));
 
                 if (ret == "1" || ret == "TRUE" || ret == "YES")
                 {
@@ -191,7 +191,7 @@ namespace ASCOM.DeltaCodeV3
         }
 
 
-        public static string CommandString(string command, bool raw)
+        public static string CommandString(string cLogPrefix, string command, bool raw)
         {
             CheckConnected("CommandString");
 
@@ -214,7 +214,7 @@ namespace ASCOM.DeltaCodeV3
                 }
 
                 cResponse = SharedSerial.ReceiveTerminated(cEndChar);
-                tl.LogMessage("CommandString", String.Format("command=<{0}>, raw={1}, return=<{2}>", command, raw, cResponse));
+                tl.LogMessage(cLogPrefix + "CommandString", String.Format("command=<{0}>, raw={1}, return=<{2}>", command, raw, cResponse));
 
                 if (cResponse.EndsWith(cEndChar))
                 {

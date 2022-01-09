@@ -90,10 +90,14 @@ namespace ASCOM.DeltaCodeV3
         /// </summary>
         internal TraceLogger tl;
 
+        private static string m_cLogPrefix = "F:";
+
+
         /// <summary>
         /// Initializes a new instance of the <see cref="DeltaCodeV3"/> class.
         /// Must be public for COM registration.
         /// </summary>
+        /// 
         public Focuser()
         {
             //MessageBox.Show("Focuser Constructor");
@@ -150,12 +154,12 @@ namespace ASCOM.DeltaCodeV3
 
         public bool CommandBool(string command, bool raw)
         {
-            return SharedResources.CommandBool(command, raw);
+            return SharedResources.CommandBool(m_cLogPrefix, command, raw);
         }
 
         public string CommandString(string command, bool raw)
         {
-            return SharedResources.CommandString(command, raw);
+            return SharedResources.CommandString(m_cLogPrefix, command, raw);
         }
 
         public void Dispose()
@@ -391,14 +395,14 @@ namespace ASCOM.DeltaCodeV3
         /// <param name="args"></param>
         private void LogMessage(string identifier, string message)
         {
-            tl.LogMessage("Focuser." + identifier, message);
+            tl.LogMessage(m_cLogPrefix + identifier, message);
         }
 
 
         private void LogMessage(string identifier, string message, params object[] args)
         {
             var msg = string.Format(message, args);
-            tl.LogMessage("Focuser." + identifier, msg);
+            tl.LogMessage(m_cLogPrefix + identifier, msg);
         }
     }
 }

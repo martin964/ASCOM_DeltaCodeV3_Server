@@ -167,10 +167,10 @@ namespace ASCOM.DeltaCodeV3
             }
         }
 
-        //private void SetupDialogForm_Shown(object sender, EventArgs e)
-        //{
-        //    //this.TopMost = true;
-        //}
+        private void SetupDialogForm_Shown(object sender, EventArgs e)
+        {
+            this.TopMost = true;
+        }
 
     }
 }

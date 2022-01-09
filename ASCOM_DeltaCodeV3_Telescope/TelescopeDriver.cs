@@ -94,6 +94,8 @@ namespace ASCOM.DeltaCodeV3
         /// 
         private TraceLogger tl;
 
+        private static string m_cLogPrefix = "T:";
+
 
         /// <summary>
         /// Target Rightascension and Declination
@@ -211,7 +213,7 @@ namespace ASCOM.DeltaCodeV3
         /// 
         public bool CommandBool(string command, bool raw)
         {
-            return SharedResources.CommandBool(command, raw);
+            return SharedResources.CommandBool (m_cLogPrefix, command, raw);
         }
 
 
@@ -225,7 +227,7 @@ namespace ASCOM.DeltaCodeV3
         /// 
         public string CommandString(string command, bool raw)
         {
-            return SharedResources.CommandString(command, raw);
+            return SharedResources.CommandString (m_cLogPrefix, command, raw);
         }
 
 
@@ -578,8 +580,8 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                LogMessage("CanSlew", "Get - " + false.ToString());
-                return false;
+                LogMessage("CanSlew", "Get - " + true.ToString());
+                return true;
             }
         }
 
@@ -1160,8 +1162,28 @@ namespace ASCOM.DeltaCodeV3
 
         public void SlewToCoordinates(double RightAscension, double Declination)
         {
-            LogMessage("SlewToCoordinates", "Not implemented");
-            throw new ASCOM.MethodNotImplementedException("SlewToCoordinates");
+            // Check if mount is parked
+            //
+            string cMountStatus = CommandString(":Gstat", false);
+            bool bAtPark = cMountStatus == "5" ? true : false;
+
+            if (bAtPark)
+            {
+                LogMessage("SlewToCoordinates", "ERROR : Mount is parked");
+                throw new ASCOM.InvalidOperationException("SlewToCoordinates");
+            }
+
+            LogMessage("SlewToCoordinates", "OK");
+            SlewToCoordinatesAsync (RightAscension, Declination);
+
+            while (true)
+            {
+                Thread.Sleep(500);
+                if (!Slewing)
+                {
+                    break;
+                }
+            }
         }
 
         public void SlewToCoordinatesAsync(double fRightAscension, double fDeclination)
@@ -1206,8 +1228,28 @@ namespace ASCOM.DeltaCodeV3
 
         public void SlewToTarget()
         {
-            LogMessage("SlewToTarget", "Not implemented");
-            throw new ASCOM.MethodNotImplementedException("SlewToTarget");
+            // Check if mount is parked
+            //
+            string cMountStatus = CommandString(":Gstat", false);
+            bool bAtPark = cMountStatus == "5" ? true : false;
+
+            if (bAtPark)
+            {
+                LogMessage("SlewToTarget", "ERROR : Mount is parked");
+                throw new ASCOM.InvalidOperationException("SlewToTarget");
+            }
+
+            LogMessage("SlewToTarget", "OK");
+            SlewToTargetAsync();
+
+            while (true)
+            {
+                Thread.Sleep(500);
+                if (!Slewing)
+                {
+                    break;
+                }
+            }
         }
 
         public void SlewToTargetAsync()
@@ -1242,6 +1284,14 @@ namespace ASCOM.DeltaCodeV3
             {
                 bool bSlewing = m_bIsSlewingRA || m_bIsSlewingDec;
 
+                if (!bSlewing)
+                {
+                    string cResponse = CommandString(":D", false);
+                    if (cResponse.Length > 1)
+                    {
+                        bSlewing = true;
+                    }
+                }
                 LogMessage("Slewing", "Get - " + bSlewing.ToString());
                 return bSlewing;
             }
@@ -1481,14 +1531,14 @@ namespace ASCOM.DeltaCodeV3
         /// 
         private void LogMessage(string identifier, string message)
         {
-            tl.LogMessage("Telescope." + identifier, message);
+            tl.LogMessage(m_cLogPrefix + identifier, message);
         }
 
 
         private void LogMessage(string identifier, string message, params object[] args)
         {
             var msg = string.Format(message, args);
-            tl.LogMessage("Telescope." + identifier, msg);
+            tl.LogMessage(m_cLogPrefix + identifier, msg);
         }
 
         #endregion
