@@ -93,6 +93,8 @@ namespace ASCOM.DeltaCodeV3
         private static string m_cLogPrefix = "F:";
 
 
+        private bool m_bFocuserEnabled = false;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="DeltaCodeV3"/> class.
         /// Must be public for COM registration.
@@ -186,6 +188,15 @@ namespace ASCOM.DeltaCodeV3
             {
                 LogMessage("Connected", "Set {0}", value);
                 SharedResources.Connected = value;
+
+                if (value)
+                {
+                    //  Ask version number
+                    //
+                    string cFocuserBusy = CommandString(":FB", false);
+                    m_bFocuserEnabled = cFocuserBusy != "N" ? true : false;
+                    LogMessage("Focuser enabled", m_bFocuserEnabled.ToString());
+                }
             }
         }
 
