@@ -342,7 +342,7 @@ namespace ASCOM.DeltaCodeV3
             get
             {
                 Version version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-                string driverVersion = String.Format(CultureInfo.InvariantCulture, "{0}.{1}.{2}", version.Major, version.Minor, version.Revision);
+                string driverVersion = String.Format(CultureInfo.InvariantCulture, "{0}.{1}", version.Major, version.Minor);
 
                 LogMessage("DriverVersion Get", driverVersion);
 
@@ -634,8 +634,20 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                LogMessage("CanUnpark", "Get - " + true.ToString());
-                return true;
+                CheckConnected("CanUnpark.get");
+
+                string cCanPark = CommandString(":h?", false);
+
+                if (cCanPark == "1")
+                {
+                    LogMessage("CanUnpark", "Get - " + true.ToString());
+                    return true;
+                }
+                else
+                {
+                    LogMessage("CanUnpark", "Get - " + false.ToString());
+                    return false;
+                }
             }
         }
 
@@ -918,12 +930,22 @@ namespace ASCOM.DeltaCodeV3
 
         public void Park()
         {
-            LogMessage("Park", "OK");
-            CommandBlind(":hP", false);
+            string cCanPark = CommandString(":h?", false);
 
-            //  give DeltaCode time to  calculate Parked status
-            //
-            Thread.Sleep(500);
+            if (cCanPark == "1")
+            {
+                LogMessage("Park", "OK");
+                CommandBlind(":hP", false);
+
+                //  give DeltaCode time to  calculate Parked status
+                //
+                Thread.Sleep(500);
+            }
+            else
+            {
+                LogMessage("Park", "Not implemented");
+                throw new ASCOM.MethodNotImplementedException("Park");
+            }
         }
 
 
@@ -1037,29 +1059,26 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                LogMessage("SideOfPier Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("SideOfPier", false);
+                CheckConnected("SideOfPier.get");
 
-                //CheckConnected("SideOfPier.get");
+                string cPS;
+                PierSide ps;
 
-                //string      cPS;
-                //PierSide    ps;
-
-                //cPS = CommandString(":pS", false);
-                //switch (cPS)
-                //{
-                //    case "East":
-                //        ps = PierSide.pierEast;
-                //        break;
-                //    case "West":
-                //        ps = PierSide.pierWest;
-                //        break;
-                //    default:
-                //        ps = PierSide.pierUnknown;
-                //        break;
-                //}
-                //LogMessage("SideOfPier", "Get - " + ps.ToString());
-                //return ps;
+                cPS = CommandString(":pS", false);
+                switch (cPS)
+                {
+                    case "East":
+                        ps = PierSide.pierEast;
+                        break;
+                    case "West":
+                        ps = PierSide.pierWest;
+                        break;
+                    default:
+                        ps = PierSide.pierUnknown;
+                        break;
+                }
+                LogMessage("SideOfPier", "Get - " + ps.ToString());
+                return ps;
             }
             set
             {
@@ -1505,8 +1524,22 @@ namespace ASCOM.DeltaCodeV3
 
         public void Unpark()
         {
-            LogMessage("Unpark", "OK");
-            CommandBlind(":PO", false);
+            string cCanPark = CommandString(":h?", false);
+
+            if (cCanPark == "1")
+            {
+                LogMessage("Unpark", "OK");
+                CommandBlind(":PO", false);
+
+                //  give DeltaCode time to  calculate Parked status
+                //
+                Thread.Sleep(500);
+            }
+            else
+            {
+                LogMessage("Unpark", "Not implemented");
+                throw new ASCOM.MethodNotImplementedException("Unpark");
+            }
         }
 
 #endregion
