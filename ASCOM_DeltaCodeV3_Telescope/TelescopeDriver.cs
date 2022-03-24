@@ -1091,9 +1091,13 @@ namespace ASCOM.DeltaCodeV3
         {
             get
             {
-                double siderealTime = (18.697374558 + 24.065709824419081 * (utilities.DateLocalToJulian(DateTime.Now) - 2451545.0)) % 24.0;
-                LogMessage("SiderealTime", "Get - " + siderealTime.ToString());
-                return siderealTime;
+                CheckConnected("SiderealTime.get");
+
+                string cSiderealTime = CommandString(":GS", false);
+                double fSiderealTime = utilities.HMSToHours(cSiderealTime);
+
+                LogMessage("SiderealTime", "Get - " + utilities.HoursToHMS(fSiderealTime));
+                return fSiderealTime;
             }
         }
 
