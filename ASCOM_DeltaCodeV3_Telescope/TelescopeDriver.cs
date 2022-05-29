@@ -1310,7 +1310,7 @@ namespace ASCOM.DeltaCodeV3
                 if (!bSlewing)
                 {
                     string cResponse = CommandString(":D", false);
-                    if (cResponse.Length > 1)
+                    if (cResponse.Length > 0)
                     {
                         bSlewing = true;
                     }
